@@ -26,6 +26,7 @@ import {
   Brain,
   Sparkles,
   Settings as SettingsIcon,
+  ServerCog,
   LogOut,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -51,6 +52,7 @@ const NAV = [
   { title: "Team Statistics", to: "/team-statistics", icon: Activity },
   { title: "Intelligence", to: "/intelligence", icon: Brain },
   { title: "Predictions", to: "/predictions", icon: Sparkles },
+  { title: "System Status", to: "/system-status", icon: ServerCog },
   { title: "Settings", to: "/settings", icon: SettingsIcon },
 ] as const;
 
