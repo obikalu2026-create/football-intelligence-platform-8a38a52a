@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTeamsRouteImport } from './routes/_authenticated/teams'
 import { Route as AuthenticatedTeamStatisticsRouteImport } from './routes/_authenticated/team-statistics'
+import { Route as AuthenticatedSystemStatusRouteImport } from './routes/_authenticated/system-status'
 import { Route as AuthenticatedStandingsRouteImport } from './routes/_authenticated/standings'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSeasonsRouteImport } from './routes/_authenticated/seasons'
@@ -52,6 +53,12 @@ const AuthenticatedTeamStatisticsRoute =
   AuthenticatedTeamStatisticsRouteImport.update({
     id: '/team-statistics',
     path: '/team-statistics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSystemStatusRoute =
+  AuthenticatedSystemStatusRouteImport.update({
+    id: '/system-status',
+    path: '/system-status',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedStandingsRoute = AuthenticatedStandingsRouteImport.update({
@@ -110,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/seasons': typeof AuthenticatedSeasonsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/standings': typeof AuthenticatedStandingsRoute
+  '/system-status': typeof AuthenticatedSystemStatusRoute
   '/team-statistics': typeof AuthenticatedTeamStatisticsRoute
   '/teams': typeof AuthenticatedTeamsRoute
 }
@@ -125,6 +133,7 @@ export interface FileRoutesByTo {
   '/seasons': typeof AuthenticatedSeasonsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/standings': typeof AuthenticatedStandingsRoute
+  '/system-status': typeof AuthenticatedSystemStatusRoute
   '/team-statistics': typeof AuthenticatedTeamStatisticsRoute
   '/teams': typeof AuthenticatedTeamsRoute
 }
@@ -142,6 +151,7 @@ export interface FileRoutesById {
   '/_authenticated/seasons': typeof AuthenticatedSeasonsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/standings': typeof AuthenticatedStandingsRoute
+  '/_authenticated/system-status': typeof AuthenticatedSystemStatusRoute
   '/_authenticated/team-statistics': typeof AuthenticatedTeamStatisticsRoute
   '/_authenticated/teams': typeof AuthenticatedTeamsRoute
 }
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/seasons'
     | '/settings'
     | '/standings'
+    | '/system-status'
     | '/team-statistics'
     | '/teams'
   fileRoutesByTo: FileRoutesByTo
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/seasons'
     | '/settings'
     | '/standings'
+    | '/system-status'
     | '/team-statistics'
     | '/teams'
   id:
@@ -190,6 +202,7 @@ export interface FileRouteTypes {
     | '/_authenticated/seasons'
     | '/_authenticated/settings'
     | '/_authenticated/standings'
+    | '/_authenticated/system-status'
     | '/_authenticated/team-statistics'
     | '/_authenticated/teams'
   fileRoutesById: FileRoutesById
@@ -243,6 +256,13 @@ declare module '@tanstack/react-router' {
       path: '/team-statistics'
       fullPath: '/team-statistics'
       preLoaderRoute: typeof AuthenticatedTeamStatisticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/system-status': {
+      id: '/_authenticated/system-status'
+      path: '/system-status'
+      fullPath: '/system-status'
+      preLoaderRoute: typeof AuthenticatedSystemStatusRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/standings': {
@@ -313,6 +333,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSeasonsRoute: typeof AuthenticatedSeasonsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStandingsRoute: typeof AuthenticatedStandingsRoute
+  AuthenticatedSystemStatusRoute: typeof AuthenticatedSystemStatusRoute
   AuthenticatedTeamStatisticsRoute: typeof AuthenticatedTeamStatisticsRoute
   AuthenticatedTeamsRoute: typeof AuthenticatedTeamsRoute
 }
@@ -326,6 +347,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSeasonsRoute: AuthenticatedSeasonsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStandingsRoute: AuthenticatedStandingsRoute,
+  AuthenticatedSystemStatusRoute: AuthenticatedSystemStatusRoute,
   AuthenticatedTeamStatisticsRoute: AuthenticatedTeamStatisticsRoute,
   AuthenticatedTeamsRoute: AuthenticatedTeamsRoute,
 }
