@@ -473,7 +473,7 @@ export const recomputeIntelligence = createServerFn({ method: "POST" })
             away_score: pred.most_likely_score.away,
             predicted_result: result,
             confidence: pred.confidence,
-            reasoning: {
+            reasoning: JSON.parse(JSON.stringify({
               bullets: pred.reasoning,
               markets: pred.markets,
               expected_home_goals: pred.intelligence.expected_home_goals,
@@ -481,7 +481,7 @@ export const recomputeIntelligence = createServerFn({ method: "POST" })
               risk: pred.risk_rating,
               recommended: pred.recommended_markets,
               correct_score_candidates: pred.correct_score_candidates,
-            },
+            })),
             model_version: "v2.0",
           })
           .select("id")
