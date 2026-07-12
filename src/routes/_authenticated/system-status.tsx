@@ -203,7 +203,7 @@ function SystemStatusPage() {
             <div className="text-xs text-muted-foreground">
               Last cycle:{" "}
               {lastCycle
-                ? `#${lastCycle.cycle_number} · ${new Date(lastCycle.created_at ?? "").toLocaleString()}`
+                ? `#${lastCycle.cycle_number} · ${new Date(lastCycle.started_at ?? lastCycle.completed_at ?? "").toLocaleString()}`
                 : "no cycles yet"}
             </div>
             <div className="text-xs text-muted-foreground">
