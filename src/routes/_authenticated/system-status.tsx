@@ -1,8 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -12,13 +16,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EmptyState } from "@/components/empty-state";
-import { Activity, Database } from "lucide-react";
+import { Activity, Database, RefreshCw, DownloadCloud, CheckCheck } from "lucide-react";
+import { toast } from "sonner";
 import {
   enginesQuery,
   learnedInsightsQuery,
   learningCyclesQuery,
   rowCountsQuery,
 } from "@/lib/queries";
+import {
+  syncCompetition,
+  recomputeIntelligence,
+  evaluatePredictions,
+} from "@/lib/sync.functions";
 
 export const Route = createFileRoute("/_authenticated/system-status")({
   head: () => ({ meta: [{ title: "System Status — Football Intelligence" }] }),
@@ -37,9 +47,42 @@ function SystemStatusPage() {
   const { data: engines } = useSuspenseQuery(enginesQuery());
   const { data: cycles } = useSuspenseQuery(learningCyclesQuery());
   const { data: insights } = useSuspenseQuery(learnedInsightsQuery());
+  const qc = useQueryClient();
 
   const lastCycle = cycles[0];
   const activeEngines = engines.filter((e) => e.is_active).length;
+
+  const [leagueId, setLeagueId] = useState("39"); // EPL default
+  const [season, setSeason] = useState(String(new Date().getFullYear() - 1));
+
+  const syncFn = useServerFn(syncCompetition);
+  const recomputeFn = useServerFn(recomputeIntelligence);
+  const evalFn = useServerFn(evaluatePredictions);
+
+  const syncMut = useMutation({
+    mutationFn: syncFn,
+    onSuccess: (r) => {
+      toast.success(`Sync complete: ${r.log.join(" · ")}`);
+      qc.invalidateQueries();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+  const recomputeMut = useMutation({
+    mutationFn: recomputeFn,
+    onSuccess: (r) => {
+      toast.success(`Recomputed ${r.intelligence ?? 0} team ratings, ${r.predictions ?? 0} predictions.`);
+      qc.invalidateQueries();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+  const evalMut = useMutation({
+    mutationFn: evalFn,
+    onSuccess: (r) => {
+      toast.success(`Evaluated ${r.evaluated} predictions.`);
+      qc.invalidateQueries();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
 
   return (
     <div className="space-y-6">
@@ -47,6 +90,60 @@ function SystemStatusPage() {
         title="System Status"
         description="Data volumes, engine health and learning history."
       />
+
+      {/* Control panel */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Database className="h-4 w-4" /> Pipeline Controls
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">API-Football League ID</label>
+              <Input value={leagueId} onChange={(e) => setLeagueId(e.target.value)} placeholder="e.g. 39" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Season year</label>
+              <Input value={season} onChange={(e) => setSeason(e.target.value)} placeholder="e.g. 2024" />
+            </div>
+            <Button
+              className="self-end"
+              disabled={syncMut.isPending}
+              onClick={() =>
+                syncMut.mutate({ data: { apiLeagueId: Number(leagueId), season: Number(season) } })
+              }
+            >
+              <DownloadCloud className="mr-2 h-4 w-4" />
+              {syncMut.isPending ? "Syncing…" : "Sync from API-Football"}
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-border/60">
+            <Button
+              variant="secondary"
+              disabled={recomputeMut.isPending}
+              onClick={() => recomputeMut.mutate({ data: {} })}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${recomputeMut.isPending ? "animate-spin" : ""}`} />
+              Recompute intelligence + predictions
+            </Button>
+            <Button
+              variant="outline"
+              disabled={evalMut.isPending}
+              onClick={() => evalMut.mutate({ data: undefined })}
+            >
+              <CheckCheck className="mr-2 h-4 w-4" />
+              Evaluate finished fixtures
+            </Button>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Sync pulls competition, season, teams, fixtures, standings and team statistics from
+            API-Football. Recompute runs the intelligence pipeline against the data currently in
+            Supabase. Evaluate scores stored predictions against finished fixtures.
+          </p>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
         {Object.entries(counts).map(([table, n]) => (
@@ -83,14 +180,11 @@ function SystemStatusPage() {
                 <TableBody>
                   {engines.map((e) => (
                     <TableRow key={e.id}>
-                      <TableCell>
-                        <div className="font-medium">{e.name}</div>
-                        <div className="text-[10px] font-mono text-muted-foreground">{e.code}</div>
-                      </TableCell>
-                      <TableCell className="text-xs">{e.version}</TableCell>
+                      <TableCell className="text-sm">{e.name}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{e.version ?? "—"}</TableCell>
                       <TableCell className="text-right">
-                        <Badge variant={e.is_active ? "default" : "outline"}>
-                          {e.is_active ? "Active" : "Inactive"}
+                        <Badge variant={e.is_active ? "default" : "outline"} className="text-[10px]">
+                          {e.is_active ? "active" : "off"}
                         </Badge>
                       </TableCell>
                     </TableRow>
@@ -103,76 +197,30 @@ function SystemStatusPage() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Database className="h-4 w-4" /> Learning cycles
-            </CardTitle>
+            <CardTitle className="text-base">Learning</CardTitle>
           </CardHeader>
-          <CardContent>
-            {cycles.length === 0 ? (
-              <EmptyState
-                title="No learning cycles yet"
-                description="Cycles are recorded after finished fixtures are evaluated. Coming in Phase 4."
-              />
-            ) : (
-              <>
-                {lastCycle && (
-                  <div className="mb-3 rounded-md border p-3 text-sm">
-                    <div className="font-medium">Cycle #{lastCycle.cycle_number}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Reviewed {lastCycle.matches_reviewed ?? 0} matches ·{" "}
-                      {lastCycle.predictions_correct ?? 0} correct /{" "}
-                      {lastCycle.predictions_wrong ?? 0} wrong
-                    </div>
-                    {lastCycle.accuracy_after != null && (
-                      <div className="text-xs mt-1">
-                        Accuracy: {((lastCycle.accuracy_before ?? 0) * 100).toFixed(1)}% →{" "}
-                        {(lastCycle.accuracy_after * 100).toFixed(1)}%
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div className="text-xs text-muted-foreground">
-                  {cycles.length} cycles recorded
-                </div>
-              </>
+          <CardContent className="space-y-3">
+            <div className="text-xs text-muted-foreground">
+              Last cycle:{" "}
+              {lastCycle
+                ? `#${lastCycle.cycle_number} · ${new Date(lastCycle.created_at ?? "").toLocaleString()}`
+                : "no cycles yet"}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Active insights: <span className="font-semibold text-foreground">{insights.length}</span>
+            </div>
+            {insights.length > 0 && (
+              <ul className="text-[11px] space-y-1">
+                {insights.slice(0, 5).map((i) => (
+                  <li key={i.id} className="truncate">
+                    · {i.title ?? i.insight_type ?? "insight"}
+                  </li>
+                ))}
+              </ul>
             )}
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Learned insights</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {insights.length === 0 ? (
-            <EmptyState
-              title="No insights yet"
-              description="Insights are surfaced automatically from repeated patterns in finished fixtures."
-            />
-          ) : (
-            <div className="space-y-3">
-              {insights.map((i) => (
-                <div key={i.id} className="rounded-md border p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="font-medium text-sm">{i.title}</div>
-                    <Badge variant="outline" className="text-xs">
-                      {i.insight_type}
-                    </Badge>
-                  </div>
-                  {i.description && (
-                    <p className="text-xs text-muted-foreground mt-1">{i.description}</p>
-                  )}
-                  <div className="text-[10px] text-muted-foreground mt-2">
-                    {i.matches_supporting ?? 0} matches supporting ·{" "}
-                    {i.confidence != null ? `${(i.confidence * 100).toFixed(0)}% confidence` : "—"}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
