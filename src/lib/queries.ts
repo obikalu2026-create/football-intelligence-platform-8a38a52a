@@ -346,3 +346,187 @@ export const rowCountsQuery = () =>
       return Object.fromEntries(results) as Record<(typeof tables)[number], number>;
     },
   });
+
+// ------- team by id (detail page) -------
+export const teamByIdQuery = (teamId: string) =>
+  queryOptions({
+    queryKey: ["team", teamId],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("teams")
+        .select("*, competition:competitions(id,name,country), season:seasons(id,year)")
+        .eq("id", teamId)
+        .single();
+      if (error) return fail<TeamWithRels>(error);
+      return data as unknown as TeamWithRels;
+    },
+  });
+
+export type TeamWithRels = Team & {
+  competition: Pick<Competition, "id" | "name" | "country"> | null;
+  season: Pick<Season, "id" | "year"> | null;
+};
+
+export const teamContextQuery = (teamId: string) =>
+  queryOptions({
+    queryKey: ["team-context", teamId],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const [statRes, standRes, intelRes, formRes, fixturesRes, predsRes] = await Promise.all([
+        supabase.from("team_statistics").select("*").eq("team_id", teamId).maybeSingle(),
+        supabase.from("league_standings").select("*").eq("team_id", teamId).maybeSingle(),
+        supabase.from("intelligence_scores").select("*").eq("team_id", teamId).maybeSingle(),
+        supabase
+          .from("team_form")
+          .select("*")
+          .eq("team_id", teamId)
+          .order("match_date", { ascending: false })
+          .limit(20),
+        supabase
+          .from("fixtures")
+          .select(
+            "*, home_team:teams!fixtures_home_team_id_fkey(id,name,short_name,logo_url), away_team:teams!fixtures_away_team_id_fkey(id,name,short_name,logo_url), competition:competitions(id,name), season:seasons(id,year)",
+          )
+          .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
+          .order("kickoff_time", { ascending: false })
+          .limit(30),
+        supabase
+          .from("predictions")
+          .select("*, fixture:fixtures(id,kickoff_time,status,home_score,away_score), result:prediction_results(*)")
+          .or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`)
+          .order("created_at", { ascending: false })
+          .limit(50),
+      ]);
+      return {
+        statistic: statRes.data as TeamStat | null,
+        standing: standRes.data as Standing | null,
+        intelligence: intelRes.data as IntelligenceScore | null,
+        form: (formRes.data ?? []) as Tables["team_form"]["Row"][],
+        fixtures: (fixturesRes.data ?? []) as unknown as FixtureWithRels[],
+        predictions: (predsRes.data ?? []) as unknown as PredictionWithRels[],
+      };
+    },
+  });
+
+// ------- fixture by id (detail page) -------
+export const fixtureByIdQuery = (fixtureId: string) =>
+  queryOptions({
+    queryKey: ["fixture", fixtureId],
+    staleTime: 30_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("fixtures")
+        .select(
+          "*, home_team:teams!fixtures_home_team_id_fkey(id,name,short_name,logo_url), away_team:teams!fixtures_away_team_id_fkey(id,name,short_name,logo_url), competition:competitions(id,name), season:seasons(id,year)",
+        )
+        .eq("id", fixtureId)
+        .single();
+      if (error) return fail<FixtureWithRels>(error);
+      return data as unknown as FixtureWithRels;
+    },
+  });
+
+export const fixturePredictionQuery = (fixtureId: string) =>
+  queryOptions({
+    queryKey: ["fixture-prediction", fixtureId],
+    staleTime: 30_000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("predictions")
+        .select(
+          "*, features:prediction_features(*), result:prediction_results(*), home_team:teams!predictions_home_team_id_fkey(id,name,short_name,logo_url), away_team:teams!predictions_away_team_id_fkey(id,name,short_name,logo_url)",
+        )
+        .eq("fixture_id", fixtureId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return (data ?? null) as unknown as (PredictionWithRels & {
+        features: Tables["prediction_features"]["Row"][] | null;
+      }) | null;
+    },
+  });
+
+// ------- competition by id (league detail) -------
+export const competitionByIdQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["competition", id],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("competitions").select("*").eq("id", id).single();
+      if (error) return fail<Competition>(error);
+      return data;
+    },
+  });
+
+// ------- weight history -------
+export const weightHistoryQuery = () =>
+  queryOptions({
+    queryKey: ["weight_history"],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("weight_history")
+        .select("*")
+        .order("changed_at", { ascending: false })
+        .limit(200);
+      if (error) return fail<Tables["weight_history"]["Row"][]>(error);
+      return data ?? [];
+    },
+  });
+
+// ------- learning feedback -------
+export const learningFeedbackQuery = () =>
+  queryOptions({
+    queryKey: ["learning_feedback"],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("learning_feedback")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      if (error) return fail<Tables["learning_feedback"]["Row"][]>(error);
+      return data ?? [];
+    },
+  });
+
+// ------- settled predictions with features (for performance & calibration) -------
+export const settledPredictionsQuery = (opts: { limit?: number } = {}) =>
+  queryOptions({
+    queryKey: ["settled_predictions", opts],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("predictions")
+        .select(
+          "id, confidence, predicted_result, home_score, away_score, reasoning, created_at, fixture:fixtures(id,kickoff_time,status,home_score,away_score,competition_id,season_id), result:prediction_results!inner(*), home_team:teams!predictions_home_team_id_fkey(id,name,short_name,logo_url), away_team:teams!predictions_away_team_id_fkey(id,name,short_name,logo_url)",
+        )
+        .order("created_at", { ascending: false })
+        .limit(opts.limit ?? 500);
+      if (error) return fail<SettledPrediction[]>(error);
+      return (data ?? []) as unknown as SettledPrediction[];
+    },
+  });
+
+export type SettledPrediction = {
+  id: string;
+  confidence: number | null;
+  predicted_result: string;
+  home_score: number | null;
+  away_score: number | null;
+  reasoning: unknown;
+  created_at: string | null;
+  fixture: {
+    id: string;
+    kickoff_time: string | null;
+    status: string | null;
+    home_score: number | null;
+    away_score: number | null;
+    competition_id: string | null;
+    season_id: string | null;
+  } | null;
+  result: Tables["prediction_results"]["Row"][];
+  home_team: Pick<Team, "id" | "name" | "short_name" | "logo_url"> | null;
+  away_team: Pick<Team, "id" | "name" | "short_name" | "logo_url"> | null;
+};

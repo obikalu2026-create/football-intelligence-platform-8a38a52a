@@ -28,6 +28,9 @@ import {
   Settings as SettingsIcon,
   ServerCog,
   LogOut,
+  LineChart,
+  History,
+  Gauge,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -51,7 +54,11 @@ const NAV = [
   { title: "Standings", to: "/standings", icon: BarChart3 },
   { title: "Team Statistics", to: "/team-statistics", icon: Activity },
   { title: "Intelligence", to: "/intelligence", icon: Brain },
+  { title: "Power Rankings", to: "/power-rankings", icon: Gauge },
   { title: "Predictions", to: "/predictions", icon: Sparkles },
+  { title: "Performance", to: "/performance", icon: LineChart },
+  { title: "Backtesting", to: "/backtesting", icon: History },
+  { title: "Learning", to: "/learning", icon: Brain },
   { title: "System Status", to: "/system-status", icon: ServerCog },
   { title: "Settings", to: "/settings", icon: SettingsIcon },
 ] as const;
