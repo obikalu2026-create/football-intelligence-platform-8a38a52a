@@ -60,7 +60,7 @@ function PerformancePage() {
       const res = p.result?.[0];
       const fx = p.fixture;
       if (!res || !fx || fx.home_score == null || fx.away_score == null) continue;
-      const r = ((p.reasoning ?? null) as Reasoning | null) ?? null;
+      const r = (p.reasoning as Reasoning | null) ?? null;
       if (res.correct) correct++;
       if (p.home_score === fx.home_score && p.away_score === fx.away_score) exact++;
       const ph = r?.expected_home_goals ?? p.home_score ?? 0;
