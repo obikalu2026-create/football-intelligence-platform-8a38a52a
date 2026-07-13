@@ -20,10 +20,17 @@ import { Route as AuthenticatedStandingsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSeasonsRouteImport } from './routes/_authenticated/seasons'
 import { Route as AuthenticatedPredictionsRouteImport } from './routes/_authenticated/predictions'
+import { Route as AuthenticatedPowerRankingsRouteImport } from './routes/_authenticated/power-rankings'
+import { Route as AuthenticatedPerformanceRouteImport } from './routes/_authenticated/performance'
+import { Route as AuthenticatedLearningRouteImport } from './routes/_authenticated/learning'
 import { Route as AuthenticatedIntelligenceRouteImport } from './routes/_authenticated/intelligence'
 import { Route as AuthenticatedFixturesRouteImport } from './routes/_authenticated/fixtures'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCompetitionsRouteImport } from './routes/_authenticated/competitions'
+import { Route as AuthenticatedBacktestingRouteImport } from './routes/_authenticated/backtesting'
+import { Route as AuthenticatedTeamsIdRouteImport } from './routes/_authenticated/teams.$id'
+import { Route as AuthenticatedFixturesIdRouteImport } from './routes/_authenticated/fixtures.$id'
+import { Route as AuthenticatedCompetitionsIdRouteImport } from './routes/_authenticated/competitions.$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -82,6 +89,23 @@ const AuthenticatedPredictionsRoute =
     path: '/predictions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPowerRankingsRoute =
+  AuthenticatedPowerRankingsRouteImport.update({
+    id: '/power-rankings',
+    path: '/power-rankings',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedPerformanceRoute =
+  AuthenticatedPerformanceRouteImport.update({
+    id: '/performance',
+    path: '/performance',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLearningRoute = AuthenticatedLearningRouteImport.update({
+  id: '/learning',
+  path: '/learning',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedIntelligenceRoute =
   AuthenticatedIntelligenceRouteImport.update({
     id: '/intelligence',
@@ -104,38 +128,74 @@ const AuthenticatedCompetitionsRoute =
     path: '/competitions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedBacktestingRoute =
+  AuthenticatedBacktestingRouteImport.update({
+    id: '/backtesting',
+    path: '/backtesting',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedTeamsIdRoute = AuthenticatedTeamsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedTeamsRoute,
+} as any)
+const AuthenticatedFixturesIdRoute = AuthenticatedFixturesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedFixturesRoute,
+} as any)
+const AuthenticatedCompetitionsIdRoute =
+  AuthenticatedCompetitionsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedCompetitionsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/competitions': typeof AuthenticatedCompetitionsRoute
+  '/backtesting': typeof AuthenticatedBacktestingRoute
+  '/competitions': typeof AuthenticatedCompetitionsRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/fixtures': typeof AuthenticatedFixturesRoute
+  '/fixtures': typeof AuthenticatedFixturesRouteWithChildren
   '/intelligence': typeof AuthenticatedIntelligenceRoute
+  '/learning': typeof AuthenticatedLearningRoute
+  '/performance': typeof AuthenticatedPerformanceRoute
+  '/power-rankings': typeof AuthenticatedPowerRankingsRoute
   '/predictions': typeof AuthenticatedPredictionsRoute
   '/seasons': typeof AuthenticatedSeasonsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/standings': typeof AuthenticatedStandingsRoute
   '/system-status': typeof AuthenticatedSystemStatusRoute
   '/team-statistics': typeof AuthenticatedTeamStatisticsRoute
-  '/teams': typeof AuthenticatedTeamsRoute
+  '/teams': typeof AuthenticatedTeamsRouteWithChildren
+  '/competitions/$id': typeof AuthenticatedCompetitionsIdRoute
+  '/fixtures/$id': typeof AuthenticatedFixturesIdRoute
+  '/teams/$id': typeof AuthenticatedTeamsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/competitions': typeof AuthenticatedCompetitionsRoute
+  '/backtesting': typeof AuthenticatedBacktestingRoute
+  '/competitions': typeof AuthenticatedCompetitionsRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/fixtures': typeof AuthenticatedFixturesRoute
+  '/fixtures': typeof AuthenticatedFixturesRouteWithChildren
   '/intelligence': typeof AuthenticatedIntelligenceRoute
+  '/learning': typeof AuthenticatedLearningRoute
+  '/performance': typeof AuthenticatedPerformanceRoute
+  '/power-rankings': typeof AuthenticatedPowerRankingsRoute
   '/predictions': typeof AuthenticatedPredictionsRoute
   '/seasons': typeof AuthenticatedSeasonsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/standings': typeof AuthenticatedStandingsRoute
   '/system-status': typeof AuthenticatedSystemStatusRoute
   '/team-statistics': typeof AuthenticatedTeamStatisticsRoute
-  '/teams': typeof AuthenticatedTeamsRoute
+  '/teams': typeof AuthenticatedTeamsRouteWithChildren
+  '/competitions/$id': typeof AuthenticatedCompetitionsIdRoute
+  '/fixtures/$id': typeof AuthenticatedFixturesIdRoute
+  '/teams/$id': typeof AuthenticatedTeamsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -143,17 +203,24 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/_authenticated/competitions': typeof AuthenticatedCompetitionsRoute
+  '/_authenticated/backtesting': typeof AuthenticatedBacktestingRoute
+  '/_authenticated/competitions': typeof AuthenticatedCompetitionsRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/fixtures': typeof AuthenticatedFixturesRoute
+  '/_authenticated/fixtures': typeof AuthenticatedFixturesRouteWithChildren
   '/_authenticated/intelligence': typeof AuthenticatedIntelligenceRoute
+  '/_authenticated/learning': typeof AuthenticatedLearningRoute
+  '/_authenticated/performance': typeof AuthenticatedPerformanceRoute
+  '/_authenticated/power-rankings': typeof AuthenticatedPowerRankingsRoute
   '/_authenticated/predictions': typeof AuthenticatedPredictionsRoute
   '/_authenticated/seasons': typeof AuthenticatedSeasonsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/standings': typeof AuthenticatedStandingsRoute
   '/_authenticated/system-status': typeof AuthenticatedSystemStatusRoute
   '/_authenticated/team-statistics': typeof AuthenticatedTeamStatisticsRoute
-  '/_authenticated/teams': typeof AuthenticatedTeamsRoute
+  '/_authenticated/teams': typeof AuthenticatedTeamsRouteWithChildren
+  '/_authenticated/competitions/$id': typeof AuthenticatedCompetitionsIdRoute
+  '/_authenticated/fixtures/$id': typeof AuthenticatedFixturesIdRoute
+  '/_authenticated/teams/$id': typeof AuthenticatedTeamsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,10 +228,14 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/backtesting'
     | '/competitions'
     | '/dashboard'
     | '/fixtures'
     | '/intelligence'
+    | '/learning'
+    | '/performance'
+    | '/power-rankings'
     | '/predictions'
     | '/seasons'
     | '/settings'
@@ -172,15 +243,22 @@ export interface FileRouteTypes {
     | '/system-status'
     | '/team-statistics'
     | '/teams'
+    | '/competitions/$id'
+    | '/fixtures/$id'
+    | '/teams/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/backtesting'
     | '/competitions'
     | '/dashboard'
     | '/fixtures'
     | '/intelligence'
+    | '/learning'
+    | '/performance'
+    | '/power-rankings'
     | '/predictions'
     | '/seasons'
     | '/settings'
@@ -188,16 +266,23 @@ export interface FileRouteTypes {
     | '/system-status'
     | '/team-statistics'
     | '/teams'
+    | '/competitions/$id'
+    | '/fixtures/$id'
+    | '/teams/$id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/_authenticated/backtesting'
     | '/_authenticated/competitions'
     | '/_authenticated/dashboard'
     | '/_authenticated/fixtures'
     | '/_authenticated/intelligence'
+    | '/_authenticated/learning'
+    | '/_authenticated/performance'
+    | '/_authenticated/power-rankings'
     | '/_authenticated/predictions'
     | '/_authenticated/seasons'
     | '/_authenticated/settings'
@@ -205,6 +290,9 @@ export interface FileRouteTypes {
     | '/_authenticated/system-status'
     | '/_authenticated/team-statistics'
     | '/_authenticated/teams'
+    | '/_authenticated/competitions/$id'
+    | '/_authenticated/fixtures/$id'
+    | '/_authenticated/teams/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -293,6 +381,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPredictionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/power-rankings': {
+      id: '/_authenticated/power-rankings'
+      path: '/power-rankings'
+      fullPath: '/power-rankings'
+      preLoaderRoute: typeof AuthenticatedPowerRankingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/performance': {
+      id: '/_authenticated/performance'
+      path: '/performance'
+      fullPath: '/performance'
+      preLoaderRoute: typeof AuthenticatedPerformanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/learning': {
+      id: '/_authenticated/learning'
+      path: '/learning'
+      fullPath: '/learning'
+      preLoaderRoute: typeof AuthenticatedLearningRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/intelligence': {
       id: '/_authenticated/intelligence'
       path: '/intelligence'
@@ -321,35 +430,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompetitionsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/backtesting': {
+      id: '/_authenticated/backtesting'
+      path: '/backtesting'
+      fullPath: '/backtesting'
+      preLoaderRoute: typeof AuthenticatedBacktestingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/teams/$id': {
+      id: '/_authenticated/teams/$id'
+      path: '/$id'
+      fullPath: '/teams/$id'
+      preLoaderRoute: typeof AuthenticatedTeamsIdRouteImport
+      parentRoute: typeof AuthenticatedTeamsRoute
+    }
+    '/_authenticated/fixtures/$id': {
+      id: '/_authenticated/fixtures/$id'
+      path: '/$id'
+      fullPath: '/fixtures/$id'
+      preLoaderRoute: typeof AuthenticatedFixturesIdRouteImport
+      parentRoute: typeof AuthenticatedFixturesRoute
+    }
+    '/_authenticated/competitions/$id': {
+      id: '/_authenticated/competitions/$id'
+      path: '/$id'
+      fullPath: '/competitions/$id'
+      preLoaderRoute: typeof AuthenticatedCompetitionsIdRouteImport
+      parentRoute: typeof AuthenticatedCompetitionsRoute
+    }
   }
 }
 
+interface AuthenticatedCompetitionsRouteChildren {
+  AuthenticatedCompetitionsIdRoute: typeof AuthenticatedCompetitionsIdRoute
+}
+
+const AuthenticatedCompetitionsRouteChildren: AuthenticatedCompetitionsRouteChildren =
+  {
+    AuthenticatedCompetitionsIdRoute: AuthenticatedCompetitionsIdRoute,
+  }
+
+const AuthenticatedCompetitionsRouteWithChildren =
+  AuthenticatedCompetitionsRoute._addFileChildren(
+    AuthenticatedCompetitionsRouteChildren,
+  )
+
+interface AuthenticatedFixturesRouteChildren {
+  AuthenticatedFixturesIdRoute: typeof AuthenticatedFixturesIdRoute
+}
+
+const AuthenticatedFixturesRouteChildren: AuthenticatedFixturesRouteChildren = {
+  AuthenticatedFixturesIdRoute: AuthenticatedFixturesIdRoute,
+}
+
+const AuthenticatedFixturesRouteWithChildren =
+  AuthenticatedFixturesRoute._addFileChildren(
+    AuthenticatedFixturesRouteChildren,
+  )
+
+interface AuthenticatedTeamsRouteChildren {
+  AuthenticatedTeamsIdRoute: typeof AuthenticatedTeamsIdRoute
+}
+
+const AuthenticatedTeamsRouteChildren: AuthenticatedTeamsRouteChildren = {
+  AuthenticatedTeamsIdRoute: AuthenticatedTeamsIdRoute,
+}
+
+const AuthenticatedTeamsRouteWithChildren =
+  AuthenticatedTeamsRoute._addFileChildren(AuthenticatedTeamsRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedCompetitionsRoute: typeof AuthenticatedCompetitionsRoute
+  AuthenticatedBacktestingRoute: typeof AuthenticatedBacktestingRoute
+  AuthenticatedCompetitionsRoute: typeof AuthenticatedCompetitionsRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedFixturesRoute: typeof AuthenticatedFixturesRoute
+  AuthenticatedFixturesRoute: typeof AuthenticatedFixturesRouteWithChildren
   AuthenticatedIntelligenceRoute: typeof AuthenticatedIntelligenceRoute
+  AuthenticatedLearningRoute: typeof AuthenticatedLearningRoute
+  AuthenticatedPerformanceRoute: typeof AuthenticatedPerformanceRoute
+  AuthenticatedPowerRankingsRoute: typeof AuthenticatedPowerRankingsRoute
   AuthenticatedPredictionsRoute: typeof AuthenticatedPredictionsRoute
   AuthenticatedSeasonsRoute: typeof AuthenticatedSeasonsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedStandingsRoute: typeof AuthenticatedStandingsRoute
   AuthenticatedSystemStatusRoute: typeof AuthenticatedSystemStatusRoute
   AuthenticatedTeamStatisticsRoute: typeof AuthenticatedTeamStatisticsRoute
-  AuthenticatedTeamsRoute: typeof AuthenticatedTeamsRoute
+  AuthenticatedTeamsRoute: typeof AuthenticatedTeamsRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedCompetitionsRoute: AuthenticatedCompetitionsRoute,
+  AuthenticatedBacktestingRoute: AuthenticatedBacktestingRoute,
+  AuthenticatedCompetitionsRoute: AuthenticatedCompetitionsRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedFixturesRoute: AuthenticatedFixturesRoute,
+  AuthenticatedFixturesRoute: AuthenticatedFixturesRouteWithChildren,
   AuthenticatedIntelligenceRoute: AuthenticatedIntelligenceRoute,
+  AuthenticatedLearningRoute: AuthenticatedLearningRoute,
+  AuthenticatedPerformanceRoute: AuthenticatedPerformanceRoute,
+  AuthenticatedPowerRankingsRoute: AuthenticatedPowerRankingsRoute,
   AuthenticatedPredictionsRoute: AuthenticatedPredictionsRoute,
   AuthenticatedSeasonsRoute: AuthenticatedSeasonsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedStandingsRoute: AuthenticatedStandingsRoute,
   AuthenticatedSystemStatusRoute: AuthenticatedSystemStatusRoute,
   AuthenticatedTeamStatisticsRoute: AuthenticatedTeamStatisticsRoute,
-  AuthenticatedTeamsRoute: AuthenticatedTeamsRoute,
+  AuthenticatedTeamsRoute: AuthenticatedTeamsRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -364,13 +547,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
