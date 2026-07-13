@@ -34,7 +34,7 @@ function FixtureDetailPage() {
   const { id } = Route.useParams();
   const { data: fx } = useSuspenseQuery(fixtureByIdQuery(id));
   const { data: pred } = useSuspenseQuery(fixturePredictionQuery(id));
-  const reasoning = ((pred?.reasoning ?? null) as ReasoningPayload | null) ?? null;
+  const reasoning = (pred?.reasoning as ReasoningPayload | null) ?? null;
   const features = pred?.features?.[0] ?? null;
   const m = reasoning?.markets ?? null;
 
