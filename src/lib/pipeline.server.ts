@@ -41,11 +41,11 @@ export async function seedDefaults(admin: Admin): Promise<{ weights: number; eng
   const { data: engines } = await admin.from("prediction_engines").select("name");
   const engineNames = new Set((engines ?? []).map((e) => e.name));
   const engineDefs = [
-    { name: "attack", version: "v2.0", is_active: true },
-    { name: "defence", version: "v2.0", is_active: true },
-    { name: "form", version: "v2.0", is_active: true },
-    { name: "power", version: "v2.0", is_active: true },
-    { name: "goal_expectancy", version: "v2.0", is_active: true },
+    { code: "attack", name: "attack", version: "v2.0", is_active: true },
+    { code: "defence", name: "defence", version: "v2.0", is_active: true },
+    { code: "form", name: "form", version: "v2.0", is_active: true },
+    { code: "power", name: "power", version: "v2.0", is_active: true },
+    { code: "goal_expectancy", name: "goal_expectancy", version: "v2.0", is_active: true },
   ].filter((e) => !engineNames.has(e.name));
   if (engineDefs.length) await admin.from("prediction_engines").insert(engineDefs);
 
