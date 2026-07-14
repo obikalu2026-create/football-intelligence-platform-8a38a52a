@@ -237,6 +237,28 @@ export async function deriveTeamStatistics(admin: Admin, seasonId: string): Prom
     const as = f.away_score;
     const h = get(f.home_team_id, f.competition_id);
     const a = get(f.away_team_id, f.competition_id);
+    // -----------------------------
+// Home / Away splits
+// -----------------------------
+
+h.home_gf += hs;
+h.home_ga += as;
+
+a.away_gf += as;
+a.away_ga += hs;
+
+if (hs > as) {
+  h.home_wins++;
+  a.away_losses++;
+}
+else if (hs < as) {
+  h.home_losses++;
+  a.away_wins++;
+}
+else {
+  h.home_draws++;
+  a.away_draws++;
+}
     h.played++;
     a.played++;
     h.gf += hs; h.ga += as;
@@ -272,8 +294,34 @@ export async function deriveTeamStatistics(admin: Admin, seasonId: string): Prom
   for (const t of teams ?? []) {
     if (apiStatsTeams.has(t.id)) continue; // keep API-imported stats untouched
     const a = agg.get(t.id) ?? {
-      played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, cs: 0, fts: 0, competition_id: t.competition_id,
-    };
+    played: 0,
+
+    wins: 0,
+    draws: 0,
+    losses: 0,
+
+    gf: 0,
+    ga: 0,
+
+    cs: 0,
+    fts: 0,
+
+    home_wins: 0,
+    home_draws: 0,
+    home_losses: 0,
+
+    away_wins: 0,
+    away_draws: 0,
+    away_losses: 0,
+
+    home_gf: 0,
+    home_ga: 0,
+
+    away_gf: 0,
+    away_ga: 0,
+
+    competition_id: t.competition_id,
+};
     const compId = a.competition_id ?? t.competition_id;
     if (!compId) continue;
     rows.push({
@@ -402,18 +450,34 @@ export async function runIntelligenceForSeason(
     if (!s.team_id) continue;
     const form = formByTeam.get(s.team_id);
     const opponents = standings.filter((x) => x.team_id !== s.team_id);
-    const r = buildTeamRatings(
-      {
-        team_id: s.team_id,
-        matches_played: s.matches_played ?? 0,
-        wins: s.wins ?? 0,
-        draws: s.draws ?? 0,
-        losses: s.losses ?? 0,
-        goals_scored: s.goals_for ?? 0,
-        goals_conceded: s.goals_against ?? 0,
-        clean_sheets: s.clean_sheets,
-        failed_to_score: s.failed_to_score,
-      },
+    buildTeamRatings({
+    team_id: s.team_id,
+    matches_played: s.matches_played ?? 0,
+
+    wins: s.wins ?? 0,
+    draws: s.draws ?? 0,
+    losses: s.losses ?? 0,
+
+    goals_scored: s.goals_for ?? 0,
+    goals_conceded: s.goals_against ?? 0,
+
+    clean_sheets: s.clean_sheets,
+    failed_to_score: s.failed_to_score,
+
+    home_wins: s.home_wins,
+    home_draws: s.home_draws,
+    home_losses: s.home_losses,
+
+    away_wins: s.away_wins,
+    away_draws: s.away_draws,
+    away_losses: s.away_losses,
+
+    home_goals_scored: s.home_goals_scored,
+    home_goals_conceded: s.home_goals_conceded,
+
+    away_goals_scored: s.away_goals_scored,
+    away_goals_conceded: s.away_goals_conceded,
+},
       form
         ? {
             team_id: s.team_id,
