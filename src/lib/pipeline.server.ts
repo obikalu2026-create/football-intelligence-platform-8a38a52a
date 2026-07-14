@@ -752,6 +752,11 @@ const headToHead = h2hMap.get(h2hKey) ?? {
 away_team_name: teamsById.get(f.away_team_id)?.name ?? "Away",
 
 head_to_head: headToHead,
+      home_recent_form:
+  recentHomeAwayByTeam.get(f.home_team_id) ?? null,
+
+away_recent_form:
+  recentHomeAwayByTeam.get(f.away_team_id) ?? null,
     });
 
     const result =
