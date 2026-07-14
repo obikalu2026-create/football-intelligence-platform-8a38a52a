@@ -29,6 +29,7 @@ import {
   recomputeIntelligence,
   evaluatePredictions,
 } from "@/lib/sync.functions";
+import { bootstrapIntelligence } from "@/lib/bootstrap.functions";
 
 export const Route = createFileRoute("/_authenticated/system-status")({
   head: () => ({ meta: [{ title: "System Status — Football Intelligence" }] }),
