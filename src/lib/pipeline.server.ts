@@ -406,6 +406,58 @@ export async function runIntelligenceForSeason(
   const standings = standingsQ.data ?? [];
   const teams = teamsQ.data ?? [];
   const fixtures = fixturesQ.data ?? [];
+
+  // ---------------------------------------------------------------------
+// Build Head-to-Head lookup from finished fixtures
+// ---------------------------------------------------------------------
+
+type H2H = {
+  matches: number;
+  homeWins: number;
+  draws: number;
+  awayWins: number;
+  homeGoals: number;
+  awayGoals: number;
+};
+
+const h2hMap = new Map<string, H2H>();
+
+for (const fixture of fixtures) {
+  if (!isFinished(fixture.status)) continue;
+  if (fixture.home_score == null || fixture.away_score == null) continue;
+
+  // Make the key independent of home/away order
+  const ids = [fixture.home_team_id, fixture.away_team_id].sort();
+  const key = ids.join("_");
+
+  let h2h = h2hMap.get(key);
+
+  if (!h2h) {
+    h2h = {
+      matches: 0,
+      homeWins: 0,
+      draws: 0,
+      awayWins: 0,
+      homeGoals: 0,
+      awayGoals: 0,
+    };
+
+    h2hMap.set(key, h2h);
+  }
+
+  h2h.matches++;
+
+  h2h.homeGoals += fixture.home_score;
+  h2h.awayGoals += fixture.away_score;
+
+  if (fixture.home_score > fixture.away_score) {
+    h2h.homeWins++;
+  } else if (fixture.home_score < fixture.away_score) {
+    h2h.awayWins++;
+  } else {
+    h2h.draws++;
+  }
+}
   const forms = formQ.data ?? [];
 
   const teamsById = new Map(teams.map((t) => [t.id, t]));
@@ -572,6 +624,23 @@ export async function runIntelligenceForSeason(
     const ar = ratingsByTeam.get(f.away_team_id);
     const hs = statsByTeam.get(f.home_team_id);
     const as = statsByTeam.get(f.away_team_id);
+
+    // -------------------------------------------------------
+// Get Head-to-Head record for these two teams
+// -------------------------------------------------------
+
+const h2hKey = [f.home_team_id, f.away_team_id]
+  .sort()
+  .join("_");
+
+const headToHead = h2hMap.get(h2hKey) ?? {
+  matches: 0,
+  homeWins: 0,
+  draws: 0,
+  awayWins: 0,
+  homeGoals: 0,
+  awayGoals: 0,
+};
     if (!hr || !ar || !hs || !as) continue;
     const pred = predictFixture({
       fixture_id: f.id,
@@ -600,7 +669,9 @@ export async function runIntelligenceForSeason(
       home_ratings: hr,
       away_ratings: ar,
       home_team_name: teamsById.get(f.home_team_id)?.name ?? "Home",
-      away_team_name: teamsById.get(f.away_team_id)?.name ?? "Away",
+away_team_name: teamsById.get(f.away_team_id)?.name ?? "Away",
+
+head_to_head: headToHead,
     });
 
     const result =
