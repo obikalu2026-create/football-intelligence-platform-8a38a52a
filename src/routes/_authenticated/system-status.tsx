@@ -29,6 +29,7 @@ import {
   recomputeIntelligence,
   evaluatePredictions,
 } from "@/lib/sync.functions";
+import { bootstrapIntelligence } from "@/lib/bootstrap.functions";
 
 export const Route = createFileRoute("/_authenticated/system-status")({
   head: () => ({ meta: [{ title: "System Status — Football Intelligence" }] }),
@@ -58,6 +59,21 @@ function SystemStatusPage() {
   const syncFn = useServerFn(syncCompetition);
   const recomputeFn = useServerFn(recomputeIntelligence);
   const evalFn = useServerFn(evaluatePredictions);
+  const bootstrapFn = useServerFn(bootstrapIntelligence);
+
+  const bootstrapMut = useMutation({
+    mutationFn: bootstrapFn,
+    onSuccess: (r) => {
+      const t = r.totals;
+      toast.success(
+        t
+          ? `Bootstrap ok: form=${t.form} stats=${t.stats} intel=${t.intelligence} preds=${t.predictions} eval=${t.evaluated}`
+          : (r.message ?? "Bootstrap complete"),
+      );
+      qc.invalidateQueries();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
 
   const syncMut = useMutation({
     mutationFn: syncFn,
@@ -120,6 +136,13 @@ function SystemStatusPage() {
             </Button>
           </div>
           <div className="flex flex-wrap gap-2 pt-2 border-t border-border/60">
+            <Button
+              disabled={bootstrapMut.isPending}
+              onClick={() => bootstrapMut.mutate({ data: undefined })}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${bootstrapMut.isPending ? "animate-spin" : ""}`} />
+              {bootstrapMut.isPending ? "Bootstrapping…" : "Run Bootstrap Pipeline"}
+            </Button>
             <Button
               variant="secondary"
               disabled={recomputeMut.isPending}
