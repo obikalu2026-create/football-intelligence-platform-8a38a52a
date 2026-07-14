@@ -228,9 +228,11 @@ export async function deriveTeamStatistics(admin: Admin, seasonId: string): Prom
     const a = agg.get(t.id) ?? {
       played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, cs: 0, fts: 0, competition_id: t.competition_id,
     };
+    const compId = a.competition_id ?? t.competition_id;
+    if (!compId) continue;
     rows.push({
       api_id: `derived-${seasonId}-${t.id}`,
-      competition_id: a.competition_id ?? t.competition_id,
+      competition_id: compId,
       season_id: seasonId,
       team_id: t.id,
       matches_played: a.played,
