@@ -81,10 +81,53 @@ export function buildFixtureIntelligence(input: FixtureInput): FixtureIntelligen
   const xgHome = expectedGoals(input.home_stats, "home");
   const xgAway = expectedGoals(input.away_stats, "away");
 
-  // Blend: attacker's own for-rate with opponent's against-rate.
-  const lambdaHome =
-    (xgHome.for + xgAway.against) / 2 + HOME_ADVANTAGE_GOALS;
-  const lambdaAway = (xgAway.for + xgHome.against) / 2;
+  // ---------------------------------------------------------------------
+// Build expected goals from base scoring rates plus intelligence ratings.
+// Each modifier is intentionally small to keep the model stable.
+// ---------------------------------------------------------------------
+
+const baseHome = (xgHome.for + xgAway.against) / 2;
+const baseAway = (xgAway.for + xgHome.against) / 2;
+
+// Attack influence (±15%)
+const homeAttackModifier =
+  1 + ((input.home_ratings.attack - 50) / 50) * 0.15;
+
+const awayAttackModifier =
+  1 + ((input.away_ratings.attack - 50) / 50) * 0.15;
+
+// Opponent defence influence (±15%)
+const homeDefenceModifier =
+  1 + ((50 - input.away_ratings.defence) / 50) * 0.15;
+
+const awayDefenceModifier =
+  1 + ((50 - input.home_ratings.defence) / 50) * 0.15;
+
+// Recent form influence (±10%)
+const homeFormModifier =
+  1 + ((input.home_ratings.form - 50) / 50) * 0.10;
+
+const awayFormModifier =
+  1 + ((input.away_ratings.form - 50) / 50) * 0.10;
+
+const lambdaHome = clamp(
+  baseHome *
+    homeAttackModifier *
+    homeDefenceModifier *
+    homeFormModifier +
+    HOME_ADVANTAGE_GOALS,
+  0.2,
+  4.5,
+);
+
+const lambdaAway = clamp(
+  baseAway *
+    awayAttackModifier *
+    awayDefenceModifier *
+    awayFormModifier,
+  0.2,
+  4.5,
+);
 
   const attackAdv = input.home_ratings.attack - input.away_ratings.attack;
   const defenceAdv = input.home_ratings.defence - input.away_ratings.defence;
