@@ -16,6 +16,7 @@ import { generateReasoning } from "./reasoning";
 import { clamp } from "./util";
 import { headToHeadRating } from "./engines/headToHead";
 import { recentHomeAwayRating } from "./engines/recentHomeAway";
+import { restFatigueRating } from "./engines/restFatigue";
 import type {
   FixtureIntelligence,
   PredictionOutput,
@@ -102,6 +103,19 @@ away_recent_form?: {
   away_goals_for_last5: number;
   away_goals_against_last5: number;
 } | null;
+  home_rest_fatigue: {
+  daysRest: number;
+  matchesLast7: number;
+  matchesLast14: number;
+  matchesLast30: number;
+} | null;
+
+away_rest_fatigue: {
+  daysRest: number;
+  matchesLast7: number;
+  matchesLast14: number;
+  matchesLast30: number;
+} | null;
 }
 
 export function buildFixtureIntelligence(input: FixtureInput): FixtureIntelligence {
@@ -114,6 +128,11 @@ const homeRecent =
 
 const awayRecent =
   recentHomeAwayRating(input.away_recent_form);
+  const homeRest =
+  restFatigueRating(input.home_rest_fatigue);
+
+const awayRest =
+  restFatigueRating(input.away_rest_fatigue);
 
   // ---------------------------------------------------------------------
 // Build expected goals from base scoring rates plus intelligence ratings.
