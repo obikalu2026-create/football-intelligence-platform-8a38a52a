@@ -551,6 +551,64 @@ for (const [teamId, matches] of grouped) {
     ),
   });
 }
+  // ---------------------------------------------------------------------
+// Rest / Fatigue lookup
+// ---------------------------------------------------------------------
+
+type RestFatigue = {
+  daysRest: number;
+  matchesLast7: number;
+  matchesLast14: number;
+  matchesLast30: number;
+};
+
+const restFatigueByTeam = new Map<string, RestFatigue>();
+
+const now = Date.now();
+
+for (const [teamId, matches] of grouped) {
+
+  const sorted = [...matches].sort(
+    (a, b) =>
+      new Date(b.match_date ?? 0).getTime() -
+      new Date(a.match_date ?? 0).getTime(),
+  );
+
+  const latest = sorted[0];
+
+  const daysRest = latest
+    ? Math.floor(
+        (now - new Date(latest.match_date ?? 0).getTime()) /
+          (1000 * 60 * 60 * 24),
+      )
+    : 30;
+
+  const matchesLast7 = sorted.filter(
+    m =>
+      now - new Date(m.match_date ?? 0).getTime() <=
+      7 * 24 * 60 * 60 * 1000,
+  ).length;
+
+  const matchesLast14 = sorted.filter(
+    m =>
+      now - new Date(m.match_date ?? 0).getTime() <=
+      14 * 24 * 60 * 60 * 1000,
+  ).length;
+
+  const matchesLast30 = sorted.filter(
+    m =>
+      now - new Date(m.match_date ?? 0).getTime() <=
+      30 * 24 * 60 * 60 * 1000,
+  ).length;
+
+  restFatigueByTeam.set(teamId, {
+    daysRest,
+    matchesLast7,
+    matchesLast14,
+    matchesLast30,
+  });
+
+}
   const formByTeam = new Map<string, { form_string: string; pts: number; gs: number; ga: number }>();
   for (const [teamId, arr] of grouped) {
     const sorted = [...arr]
@@ -757,6 +815,11 @@ head_to_head: headToHead,
 
 away_recent_form:
   recentHomeAwayByTeam.get(f.away_team_id) ?? null,
+      home_rest_fatigue:
+  restFatigueByTeam.get(f.home_team_id) ?? null,
+
+away_rest_fatigue:
+  restFatigueByTeam.get(f.away_team_id) ?? null,
     });
 
     const result =
