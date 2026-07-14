@@ -155,12 +155,33 @@ const lambdaAway = clamp(
   0.2,
   4.5,
 );
+  // ----------------------------------------------------
+// Head-to-Head adjustment
+// Only influences predictions when enough meetings exist.
+// ----------------------------------------------------
+
+const h2hWeight = h2h.confidence / 100;
+
+const adjustedHomeGoals = clamp(
+  lambdaHome +
+    ((h2h.home_advantage - 50) / 50) * 0.20 * h2hWeight,
+  0.2,
+  4.5,
+);
+
+const adjustedAwayGoals = clamp(
+  lambdaAway +
+    ((h2h.away_advantage - 50) / 50) * 0.20 * h2hWeight,
+  0.2,
+  4.5,
+);
 
   const attackAdv = input.home_ratings.attack - input.away_ratings.attack;
   const defenceAdv = input.home_ratings.defence - input.away_ratings.defence;
   const formAdv = input.home_ratings.form - input.away_ratings.form;
   const momentumAdv = input.home_ratings.momentum - input.away_ratings.momentum;
   const homeAdv = clamp(input.home_ratings.home_strength - 50, -50, 50);
+  const h2h = headToHeadRating(input.head_to_head);
 
   return {
     fixture_id: input.fixture_id,
@@ -175,10 +196,10 @@ const lambdaAway = clamp(
     home_advantage: homeAdv,
     fixture_difficulty_home: fixtureDifficulty(input.away_ratings.power_rating, false),
     fixture_difficulty_away: fixtureDifficulty(input.home_ratings.power_rating, true),
-    expected_home_goals: lambdaHome,
-    expected_away_goals: lambdaAway,
-    expected_total_goals: lambdaHome + lambdaAway,
-    expected_goal_difference: lambdaHome - lambdaAway,
+    expected_home_goals: adjustedHomeGoals,
+expected_away_goals: adjustedAwayGoals,
+expected_total_goals: adjustedHomeGoals + adjustedAwayGoals,
+expected_goal_difference: adjustedHomeGoals - adjustedAwayGoals,
   };
 }
 
