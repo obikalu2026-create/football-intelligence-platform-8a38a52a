@@ -14,6 +14,7 @@ import { marketsFromMatrix, scoreMatrix, topScorelines } from "./probability";
 import { confidenceScore, recommendedMarkets, riskRating } from "./confidence";
 import { generateReasoning } from "./reasoning";
 import { clamp } from "./util";
+import { headToHeadRating } from "./engines/headToHead";
 import type {
   FixtureIntelligence,
   PredictionOutput,
@@ -75,6 +76,14 @@ export interface FixtureInput {
   away_ratings: TeamRatings;
   home_team_name: string;
   away_team_name: string;
+  head_to_head?: {
+  matches: number;
+  homeWins: number;
+  draws: number;
+  awayWins: number;
+  homeGoals: number;
+  awayGoals: number;
+} | null;
 }
 
 export function buildFixtureIntelligence(input: FixtureInput): FixtureIntelligence {
