@@ -582,7 +582,7 @@ for (const [teamId, matches] of grouped) {
     if (!s.team_id) continue;
     const form = formByTeam.get(s.team_id);
     const opponents = standings.filter((x) => x.team_id !== s.team_id);
-    buildTeamRatings({
+    const r = buildTeamRatings({
     team_id: s.team_id,
     matches_played: s.matches_played ?? 0,
 
