@@ -137,6 +137,13 @@ function SystemStatusPage() {
           </div>
           <div className="flex flex-wrap gap-2 pt-2 border-t border-border/60">
             <Button
+              disabled={bootstrapMut.isPending}
+              onClick={() => bootstrapMut.mutate({ data: undefined })}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${bootstrapMut.isPending ? "animate-spin" : ""}`} />
+              {bootstrapMut.isPending ? "Bootstrapping…" : "Run Bootstrap Pipeline"}
+            </Button>
+            <Button
               variant="secondary"
               disabled={recomputeMut.isPending}
               onClick={() => recomputeMut.mutate({ data: {} })}
