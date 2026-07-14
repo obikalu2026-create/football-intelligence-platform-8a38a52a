@@ -107,6 +107,13 @@ away_recent_form?: {
 export function buildFixtureIntelligence(input: FixtureInput): FixtureIntelligence {
   const xgHome = expectedGoals(input.home_stats, "home");
   const xgAway = expectedGoals(input.away_stats, "away");
+  const h2h = headToHeadRating(input.head_to_head);
+
+const homeRecent =
+  recentHomeAwayRating(input.home_recent_form);
+
+const awayRecent =
+  recentHomeAwayRating(input.away_recent_form);
 
   // ---------------------------------------------------------------------
 // Build expected goals from base scoring rates plus intelligence ratings.
@@ -217,10 +224,6 @@ const adjustedAwayGoals = clamp(
   const formAdv = input.home_ratings.form - input.away_ratings.form;
   const momentumAdv = input.home_ratings.momentum - input.away_ratings.momentum;
   const homeAdv = clamp(input.home_ratings.home_strength - 50, -50, 50);
-  const h2h = headToHeadRating(input.head_to_head);
-  const homeRecent = recentHomeAwayRating(input.home_recent_form);
-const awayRecent = recentHomeAwayRating(input.away_recent_form);
-
   return {
     fixture_id: input.fixture_id,
     home_team_id: input.home_stats.team_id,
