@@ -59,6 +59,21 @@ function SystemStatusPage() {
   const syncFn = useServerFn(syncCompetition);
   const recomputeFn = useServerFn(recomputeIntelligence);
   const evalFn = useServerFn(evaluatePredictions);
+  const bootstrapFn = useServerFn(bootstrapIntelligence);
+
+  const bootstrapMut = useMutation({
+    mutationFn: bootstrapFn,
+    onSuccess: (r) => {
+      const t = r.totals;
+      toast.success(
+        t
+          ? `Bootstrap ok: form=${t.form} stats=${t.stats} intel=${t.intelligence} preds=${t.predictions} eval=${t.evaluated}`
+          : (r.message ?? "Bootstrap complete"),
+      );
+      qc.invalidateQueries();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
 
   const syncMut = useMutation({
     mutationFn: syncFn,
