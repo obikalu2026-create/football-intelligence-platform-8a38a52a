@@ -110,11 +110,27 @@ const homeFormModifier =
 const awayFormModifier =
   1 + ((input.away_ratings.form - 50) / 50) * 0.10;
 
+// Momentum influence (±5%)
+const homeMomentumModifier =
+  1 + ((input.home_ratings.momentum - 50) / 50) * 0.05;
+
+const awayMomentumModifier =
+  1 + ((input.away_ratings.momentum - 50) / 50) * 0.05;
+
+// Power rating influence (±10%)
+const homePowerModifier =
+  1 + ((input.home_ratings.power_rating - input.away_ratings.power_rating) / 100) * 0.10;
+
+const awayPowerModifier =
+  1 + ((input.away_ratings.power_rating - input.home_ratings.power_rating) / 100) * 0.10;
+
 const lambdaHome = clamp(
   baseHome *
     homeAttackModifier *
     homeDefenceModifier *
-    homeFormModifier +
+    homeFormModifier *
+    homeMomentumModifier *
+    homePowerModifier +
     HOME_ADVANTAGE_GOALS,
   0.2,
   4.5,
@@ -124,7 +140,9 @@ const lambdaAway = clamp(
   baseAway *
     awayAttackModifier *
     awayDefenceModifier *
-    awayFormModifier,
+    awayFormModifier *
+    awayMomentumModifier *
+    awayPowerModifier,
   0.2,
   4.5,
 );
