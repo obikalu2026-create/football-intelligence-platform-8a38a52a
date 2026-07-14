@@ -206,7 +206,7 @@ export async function deriveTeamStatistics(admin: Admin, seasonId: string): Prom
 
   const rows: {
     api_id: string;
-    competition_id: string | null;
+    competition_id: string;
     season_id: string;
     team_id: string;
     matches_played: number;
