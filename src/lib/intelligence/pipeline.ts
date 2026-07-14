@@ -15,6 +15,7 @@ import { confidenceScore, recommendedMarkets, riskRating } from "./confidence";
 import { generateReasoning } from "./reasoning";
 import { clamp } from "./util";
 import { headToHeadRating } from "./engines/headToHead";
+import { recentHomeAwayRating } from "./engines/recentHomeAway";
 import type {
   FixtureIntelligence,
   PredictionOutput,
@@ -83,6 +84,23 @@ export interface FixtureInput {
   awayWins: number;
   homeGoals: number;
   awayGoals: number;
+} | null;
+  home_recent_form?: {
+  home_points_last5: number;
+  away_points_last5: number;
+  home_goals_for_last5: number;
+  home_goals_against_last5: number;
+  away_goals_for_last5: number;
+  away_goals_against_last5: number;
+} | null;
+
+away_recent_form?: {
+  home_points_last5: number;
+  away_points_last5: number;
+  home_goals_for_last5: number;
+  home_goals_against_last5: number;
+  away_goals_for_last5: number;
+  away_goals_against_last5: number;
 } | null;
 }
 
@@ -164,14 +182,32 @@ const h2hWeight = h2h.confidence / 100;
 
 const adjustedHomeGoals = clamp(
   lambdaHome +
-    ((h2h.home_advantage - 50) / 50) * 0.20 * h2hWeight,
+
+    // Head-to-Head influence
+    ((h2h.home_advantage - 50) / 50) *
+      0.20 *
+      h2hWeight +
+
+    // Recent Home Form
+    ((homeRecent.home_rating - 50) / 50) *
+      0.15,
+
   0.2,
   4.5,
 );
 
 const adjustedAwayGoals = clamp(
   lambdaAway +
-    ((h2h.away_advantage - 50) / 50) * 0.20 * h2hWeight,
+
+    // Head-to-Head influence
+    ((h2h.away_advantage - 50) / 50) *
+      0.20 *
+      h2hWeight +
+
+    // Recent Away Form
+    ((awayRecent.away_rating - 50) / 50) *
+      0.15,
+
   0.2,
   4.5,
 );
@@ -182,6 +218,8 @@ const adjustedAwayGoals = clamp(
   const momentumAdv = input.home_ratings.momentum - input.away_ratings.momentum;
   const homeAdv = clamp(input.home_ratings.home_strength - 50, -50, 50);
   const h2h = headToHeadRating(input.head_to_head);
+  const homeRecent = recentHomeAwayRating(input.home_recent_form);
+const awayRecent = recentHomeAwayRating(input.away_recent_form);
 
   return {
     fixture_id: input.fixture_id,
