@@ -176,7 +176,16 @@ const homePowerModifier =
 
 const awayPowerModifier =
   1 + ((input.away_ratings.power_rating - input.home_ratings.power_rating) / 100) * 0.10;
+// ---------------------------------------------------------------------
+// Rest / Fatigue modifiers
+// ---------------------------------------------------------------------
 
+const homeRestModifier =
+  1 + ((homeRest.freshness - awayRest.freshness) / 100) * 0.08;
+
+const awayRestModifier =
+  1 + ((awayRest.freshness - homeRest.freshness) / 100) * 0.08;
+  
 const lambdaHome = clamp(
   baseHome *
     homeAttackModifier *
@@ -184,6 +193,7 @@ const lambdaHome = clamp(
     homeFormModifier *
     homeMomentumModifier *
     homePowerModifier +
+  homeRestModifier +
     HOME_ADVANTAGE_GOALS,
   0.2,
   4.5,
@@ -196,6 +206,7 @@ const lambdaAway = clamp(
     awayFormModifier *
     awayMomentumModifier *
     awayPowerModifier,
+  awayRestModifier,
   0.2,
   4.5,
 );
