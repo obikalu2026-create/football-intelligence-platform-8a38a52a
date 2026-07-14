@@ -398,7 +398,7 @@ export async function runIntelligenceForSeason(
       .eq("season_id", seasonId),
     admin
       .from("team_form")
-      .select("team_id, result, goals_for, goals_against, match_date")
+      .select("team_id, result, goals_for, goals_against, match_date,is_home")
       .eq("season_id", seasonId),
   ]);
 
@@ -471,6 +471,86 @@ for (const fixture of fixtures) {
     arr.push(f);
     grouped.set(f.team_id, arr);
   }
+
+  // ---------------------------------------------------------------------
+// Recent Home / Away Form
+// ---------------------------------------------------------------------
+
+const recentHomeAwayByTeam = new Map<
+  string,
+  {
+    home_points_last5: number;
+    away_points_last5: number;
+
+    home_goals_for_last5: number;
+    home_goals_against_last5: number;
+
+    away_goals_for_last5: number;
+    away_goals_against_last5: number;
+  }
+>();
+
+for (const [teamId, matches] of grouped) {
+
+  const sorted = [...matches].sort(
+    (a, b) =>
+      new Date(b.match_date ?? 0).getTime() -
+      new Date(a.match_date ?? 0).getTime(),
+  );
+
+  const homeMatches = sorted
+    .filter((m) => m.is_home)
+    .slice(0, 5);
+
+  const awayMatches = sorted
+    .filter((m) => !m.is_home)
+    .slice(0, 5);
+
+  recentHomeAwayByTeam.set(teamId, {
+
+    home_points_last5: homeMatches.reduce(
+      (s, m) =>
+        s +
+        (m.result === "W"
+          ? 3
+          : m.result === "D"
+          ? 1
+          : 0),
+      0,
+    ),
+
+    away_points_last5: awayMatches.reduce(
+      (s, m) =>
+        s +
+        (m.result === "W"
+          ? 3
+          : m.result === "D"
+          ? 1
+          : 0),
+      0,
+    ),
+
+    home_goals_for_last5: homeMatches.reduce(
+      (s, m) => s + (m.goals_for ?? 0),
+      0,
+    ),
+
+    home_goals_against_last5: homeMatches.reduce(
+      (s, m) => s + (m.goals_against ?? 0),
+      0,
+    ),
+
+    away_goals_for_last5: awayMatches.reduce(
+      (s, m) => s + (m.goals_for ?? 0),
+      0,
+    ),
+
+    away_goals_against_last5: awayMatches.reduce(
+      (s, m) => s + (m.goals_against ?? 0),
+      0,
+    ),
+  });
+}
   const formByTeam = new Map<string, { form_string: string; pts: number; gs: number; ga: number }>();
   for (const [teamId, arr] of grouped) {
     const sorted = [...arr]
