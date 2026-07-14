@@ -165,21 +165,67 @@ export async function deriveTeamStatistics(admin: Admin, seasonId: string): Prom
   );
 
   type Agg = {
-    played: number;
-    wins: number;
-    draws: number;
-    losses: number;
-    gf: number;
-    ga: number;
-    cs: number;
-    fts: number;
-    competition_id: string | null;
-  };
+  played: number;
+
+  wins: number;
+  draws: number;
+  losses: number;
+
+  gf: number;
+  ga: number;
+
+  cs: number;
+  fts: number;
+
+  home_wins: number;
+  home_draws: number;
+  home_losses: number;
+
+  away_wins: number;
+  away_draws: number;
+  away_losses: number;
+
+  home_gf: number;
+  home_ga: number;
+
+  away_gf: number;
+  away_ga: number;
+
+  competition_id: string | null;
+};
   const agg = new Map<string, Agg>();
   const get = (id: string, comp: string | null): Agg => {
     let a = agg.get(id);
     if (!a) {
-      a = { played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, cs: 0, fts: 0, competition_id: comp };
+      a = {
+  played: 0,
+
+  wins: 0,
+  draws: 0,
+  losses: 0,
+
+  gf: 0,
+  ga: 0,
+
+  cs: 0,
+  fts: 0,
+
+  home_wins: 0,
+  home_draws: 0,
+  home_losses: 0,
+
+  away_wins: 0,
+  away_draws: 0,
+  away_losses: 0,
+
+  home_gf: 0,
+  home_ga: 0,
+
+  away_gf: 0,
+  away_ga: 0,
+
+  competition_id: comp,
+};
       agg.set(id, a);
     }
     return a;
@@ -243,6 +289,21 @@ export async function deriveTeamStatistics(admin: Admin, seasonId: string): Prom
       goals_against: a.ga,
       clean_sheets: a.cs,
       failed_to_score: a.fts,
+      home_wins: a.home_wins,
+      
+home_draws: a.home_draws,
+home_losses: a.home_losses,
+
+away_wins: a.away_wins,
+away_draws: a.away_draws,
+away_losses: a.away_losses,
+
+home_goals_scored: a.home_gf,
+home_goals_conceded: a.home_ga,
+
+away_goals_scored: a.away_gf,
+away_goals_conceded: a.away_ga,
+      
       form: null,
       biggest_win: null,
       biggest_loss: null,
