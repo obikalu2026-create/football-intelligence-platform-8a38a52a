@@ -275,6 +275,27 @@ expected_goal_difference: adjustedHomeGoals - adjustedAwayGoals,
     head_to_head: h2h,
 home_recent_form: homeRecent,
 away_recent_form: awayRecent,
+    home_recent_stats: input.home_recent_form ?? {
+  home_points_last5: 0,
+  away_points_last5: 0,
+
+  home_goals_for_last5: 0,
+  home_goals_against_last5: 0,
+
+  away_goals_for_last5: 0,
+  away_goals_against_last5: 0,
+},
+
+away_recent_stats: input.away_recent_form ?? {
+  home_points_last5: 0,
+  away_points_last5: 0,
+
+  home_goals_for_last5: 0,
+  home_goals_against_last5: 0,
+
+  away_goals_for_last5: 0,
+  away_goals_against_last5: 0,
+},
 home_rest_fatigue: homeRest,
 away_rest_fatigue: awayRest,
   };
