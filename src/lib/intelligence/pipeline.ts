@@ -271,6 +271,12 @@ const adjustedAwayGoals = clamp(
 expected_away_goals: adjustedAwayGoals,
 expected_total_goals: adjustedHomeGoals + adjustedAwayGoals,
 expected_goal_difference: adjustedHomeGoals - adjustedAwayGoals,
+    
+    head_to_head: h2h,
+home_recent_form: homeRecent,
+away_recent_form: awayRecent,
+home_rest_fatigue: homeRest,
+away_rest_fatigue: awayRest,
   };
 }
 
