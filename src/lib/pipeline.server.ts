@@ -867,6 +867,50 @@ away_rest_fatigue:
         away_attack: ar.attack,
         home_defense: hr.defence,
         away_defense: ar.defence,
+        head_to_head_home_advantage:
+  pred.intelligence.head_to_head.home_advantage,
+
+head_to_head_away_advantage:
+  pred.intelligence.head_to_head.away_advantage,
+
+head_to_head_draw_tendency:
+  pred.intelligence.head_to_head.draw_tendency,
+
+head_to_head_confidence:
+  pred.intelligence.head_to_head.confidence,
+
+recent_home_points:
+  pred.intelligence.home_recent_form.home_points_last5,
+
+recent_away_points:
+  pred.intelligence.away_recent_form.away_points_last5,
+
+recent_home_goals_for:
+  pred.intelligence.home_recent_form.home_goals_for_last5,
+
+recent_home_goals_against:
+  pred.intelligence.home_recent_form.home_goals_against_last5,
+
+recent_away_goals_for:
+  pred.intelligence.away_recent_form.away_goals_for_last5,
+
+recent_away_goals_against:
+  pred.intelligence.away_recent_form.away_goals_against_last5,
+
+strength_of_schedule_home:
+  hr.strength_of_schedule,
+
+strength_of_schedule_away:
+  ar.strength_of_schedule,
+
+home_strength:
+  hr.home_strength,
+
+away_strength:
+  ar.away_strength,
+
+expected_goal_difference:
+  pred.intelligence.expected_goal_difference,
         home_position: standingByTeam.get(f.home_team_id)?.position ?? null,
         away_position: standingByTeam.get(f.away_team_id)?.position ?? null,
         home_points: standingByTeam.get(f.home_team_id)?.points ?? null,
