@@ -79,6 +79,34 @@ export interface FixtureIntelligence {
   expected_away_goals: number;
   expected_total_goals: number;
   expected_goal_difference: number; // home - away
+  head_to_head: {
+  home_advantage: number;
+  away_advantage: number;
+  draw_tendency: number;
+  home_goals_per_match: number;
+  away_goals_per_match: number;
+  confidence: number;
+};
+
+home_recent_form: {
+  home_rating: number;
+  away_rating: number;
+};
+
+away_recent_form: {
+  home_rating: number;
+  away_rating: number;
+};
+
+home_rest_fatigue: {
+  freshness: number;
+  fatigue: number;
+};
+
+away_rest_fatigue: {
+  freshness: number;
+  fatigue: number;
+};
 }
 
 export interface MarketProbabilities {
