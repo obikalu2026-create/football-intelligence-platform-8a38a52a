@@ -880,22 +880,22 @@ head_to_head_confidence:
   pred.intelligence.head_to_head.confidence,
 
 recent_home_points:
-  pred.intelligence.home_recent_form.home_points_last5,
+  pred.intelligence.home_recent_stats.home_points_last5,
 
 recent_away_points:
-  pred.intelligence.away_recent_form.away_points_last5,
+  pred.intelligence.away_recent_stats.away_points_last5,
 
 recent_home_goals_for:
-  pred.intelligence.home_recent_form.home_goals_for_last5,
+  pred.intelligence.home_recent_stats.home_goals_for_last5,
 
 recent_home_goals_against:
-  pred.intelligence.home_recent_form.home_goals_against_last5,
+  pred.intelligence.home_recent_stats.home_goals_against_last5,
 
 recent_away_goals_for:
-  pred.intelligence.away_recent_form.away_goals_for_last5,
+  pred.intelligence.away_recent_stats.away_goals_for_last5,
 
 recent_away_goals_against:
-  pred.intelligence.away_recent_form.away_goals_against_last5,
+  pred.intelligence.away_recent_stats.away_goals_against_last5,
 
 strength_of_schedule_home:
   hr.strength_of_schedule,
