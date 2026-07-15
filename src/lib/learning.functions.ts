@@ -8,7 +8,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const WEIGHT_KEYS = ["attack", "defence", "form", "momentum", "home", "away"] as const;
+const WEIGHT_KEYS = ["attack", "defence", "form", "momentum", "home", "away" "head_to_head",
+
+  "recent_home_form",
+  "recent_away_form",
+
+  "strength_of_schedule",
+
+  "expected_goal_difference",] as const;
 type WeightKey = (typeof WEIGHT_KEYS)[number];
 
 interface Reasoning {
@@ -100,13 +107,43 @@ export const runLearningCycle = createServerFn({ method: "POST" })
     //    with (correct ? +1 : -1). Positive correlation => feature helped; boost. Negative => shrink.
     const featureCorr = new Map<WeightKey, { corr: number; n: number }>();
     const featureKeyMap: Record<WeightKey, [string, string] | null> = {
-      attack: ["home_attack", "away_attack"],
-      defence: ["home_defense", "away_defense"],
-      form: ["home_form", "away_form"],
-      momentum: null,
-      home: null,
-      away: null,
-    };
+  attack: ["home_attack", "away_attack"],
+
+  defence: ["home_defense", "away_defense"],
+
+  form: ["home_form", "away_form"],
+
+  momentum: null,
+
+  home: ["home_strength", "away_strength"],
+
+  away: ["away_strength", "home_strength"],
+
+  head_to_head: [
+    "head_to_head_home_advantage",
+    "head_to_head_away_advantage",
+  ],
+
+  recent_home_form: [
+    "recent_home_points",
+    "recent_away_points",
+  ],
+
+  recent_away_form: [
+    "recent_away_points",
+    "recent_home_points",
+  ],
+
+  strength_of_schedule: [
+    "strength_of_schedule_home",
+    "strength_of_schedule_away",
+  ],
+
+  expected_goal_difference: [
+    "expected_goal_difference",
+    "predicted_away_goals",
+  ],
+};
 
     for (const key of WEIGHT_KEYS) {
       const pair = featureKeyMap[key];
