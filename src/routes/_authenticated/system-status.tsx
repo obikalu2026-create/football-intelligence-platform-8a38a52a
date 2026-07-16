@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { EmptyState } from "@/components/empty-state";
 import { ImportControls } from "@/components/system-status/ImportControls";
+import { DatabaseSummary } from "@/components/system-status/DatabaseSummary";
 import { toast } from "sonner";
 import {
   enginesQuery,
@@ -55,6 +56,7 @@ function SystemStatusPage() {
 
       {/* Control panel */}
     <ImportControls />
+      <DatabaseSummary counts={counts} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
