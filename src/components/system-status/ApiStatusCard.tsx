@@ -1,17 +1,17 @@
 import {
   Activity,
-  KeyRound,
-  Clock3,
-  Database,
   Wifi,
   WifiOff,
+  KeyRound,
+  Clock3,
+ Database,
 } from "lucide-react";
 
 import {
   Card,
-  CardContent,
   CardHeader,
   CardTitle,
+  CardContent,
 } from "@/components/ui/card";
 
 import { Badge } from "@/components/ui/badge";
@@ -20,12 +20,9 @@ interface ApiStatusCardProps {
   connected: boolean;
   apiKeyConfigured: boolean;
   plan: string;
-
   requestsUsed: number;
   requestsLimit: number;
-
   resetTime: string;
-
   lastSync: string | null;
 }
 
@@ -38,23 +35,29 @@ export function ApiStatusCard({
   resetTime,
   lastSync,
 }: ApiStatusCardProps) {
-  const remaining =
-    Math.max(
-      requestsLimit - requestsUsed,
-      0,
-    );
+  const remaining = Math.max(
+    requestsLimit - requestsUsed,
+    0,
+  );
+
+  const percentage =
+    requestsLimit === 0
+      ? 0
+      : (requestsUsed / requestsLimit) * 100;
 
   return (
-  <div
-    style={{
-      background: "red",
-      color: "white",
-      padding: 30,
-      fontSize: 24,
-      fontWeight: "bold",
-    }}
-  >
-    API STATUS CARD WORKS
-  </div>
-);
-}
+    <Card>
+
+      <CardHeader>
+
+        <CardTitle className="flex items-center gap-2">
+
+          <Activity className="h-5 w-5" />
+
+          API-Football Status
+
+        </CardTitle>
+
+      </CardHeader>
+
+      <CardContent className="space-y-5">
