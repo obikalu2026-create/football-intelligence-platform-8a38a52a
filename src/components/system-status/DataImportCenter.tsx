@@ -1,8 +1,9 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 
-import { getCompetitions } from "@/lib/competitions.functions";
 
+import { getCompetitions } from "@/lib/competitions.functions";
+import { CompetitionInfoCard } from "./CompetitionInfoCard";
 import {
   Card,
   CardHeader,
@@ -89,6 +90,16 @@ export function DataImportCenter() {
     );
 
   }, [competitions, selectedCountry]);
+
+  const selectedCompetition = useMemo(() => {
+
+  return competitions.find(
+
+    c => String(c.id) === selectedLeague
+
+  ) ?? null;
+
+}, [competitions, selectedLeague]);
 
   return (
 
@@ -199,6 +210,10 @@ export function DataImportCenter() {
           </div>
 
         )}
+
+        <CompetitionInfoCard
+  competition={selectedCompetition}
+/>
 
         {!loading && competitions.length === 0 && (
 
