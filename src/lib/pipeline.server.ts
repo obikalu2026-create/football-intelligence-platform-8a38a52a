@@ -781,6 +781,9 @@ const headToHead = h2hMap.get(h2hKey) ?? {
 };
     if (!hr || !ar || !hs || !as) continue;
     const pred = predictFixture({
+      console.log("=== DEBUG PREDICTION ===");
+console.log(JSON.stringify(pred.intelligence, null, 2));
+console.log("========================");
       fixture_id: f.id,
       home_stats: {
         team_id: f.home_team_id,
