@@ -17,6 +17,7 @@ import {
 import { EmptyState } from "@/components/empty-state";
 import { ImportControls } from "@/components/system-status/ImportControls";
 import { DatabaseSummary } from "@/components/system-status/DatabaseSummary";
+import { EngineStatus } from "@/components/system-status/EngineStatus";
 import { toast } from "sonner";
 import {
   enginesQuery,
@@ -45,8 +46,7 @@ function SystemStatusPage() {
   
 
   const lastCycle = cycles[0];
-  const activeEngines = engines.filter((e) => e.is_active).length;
-
+  
   return (
     <div className="space-y-6">
       <PageHeader
@@ -59,42 +59,9 @@ function SystemStatusPage() {
       <DatabaseSummary counts={counts} />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Activity className="h-4 w-4" /> Engines ({activeEngines}/{engines.length} active)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {engines.length === 0 ? (
-              <EmptyState title="No engines configured" />
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Engine</TableHead>
-                    <TableHead>Version</TableHead>
-                    <TableHead className="text-right">Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {engines.map((e) => (
-                    <TableRow key={e.id}>
-                      <TableCell className="text-sm">{e.name}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{e.version ?? "—"}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant={e.is_active ? "default" : "outline"} className="text-[10px]">
-                          {e.is_active ? "active" : "off"}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
 
+        <EngineStatus engines={engines} />
+        
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Learning</CardTitle>
