@@ -1,5 +1,6 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
+import { AvailableImports } from "./AvailableImports";
 
 
 import { getCompetitions } from "@/lib/competitions.functions";
@@ -47,6 +48,15 @@ export function DataImportCenter() {
 
   const [selectedLeague, setSelectedLeague] =
     useState("");
+
+  const [selectedImports, setSelectedImports] =
+  useState<string[]>([
+    "Competition",
+    "Seasons",
+    "Teams",
+    "Fixtures",
+    "Standings",
+  ]);
 
   useEffect(() => {
 
@@ -213,6 +223,11 @@ export function DataImportCenter() {
 
         <CompetitionInfoCard
   competition={selectedCompetition}
+/>
+        
+        <AvailableImports
+  selected={selectedImports}
+  onChange={setSelectedImports}
 />
 
         {!loading && competitions.length === 0 && (
