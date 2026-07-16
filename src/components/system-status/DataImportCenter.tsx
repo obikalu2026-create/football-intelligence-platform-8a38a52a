@@ -136,9 +136,12 @@ export function DataImportCenter() {
               </SelectTrigger>
 
               <SelectContent>
-
-                {countries.map(country => (
-
-                  <SelectItem
-                    key={country}
-                    value={
+  {countries.map((country) => (
+    <SelectItem
+      key={country}
+      value={country}
+    >
+      {country}
+    </SelectItem>
+  ))}
+</SelectContent>
