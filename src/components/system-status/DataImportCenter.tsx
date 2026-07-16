@@ -3,7 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import { AvailableImports } from "./AvailableImports";
 import { ImportActions } from "./ImportActions";
 import { runImportPipeline } from "@/lib/importPipeline.functions";
-
+import {
+  ImportProgress,
+  type ProgressStep,
+} from "./ImportProgress";
 
 import { getCompetitions } from "@/lib/competitions.functions";
 import { CompetitionInfoCard } from "./CompetitionInfoCard";
@@ -64,6 +67,8 @@ export function DataImportCenter() {
   ]);
   const [importing, setImporting] =
   useState(false);
+  const [progress, setProgress] =
+  useState<ProgressStep[]>([]);
 
   useEffect(() => {
 
@@ -126,6 +131,14 @@ export function DataImportCenter() {
 
   setImporting(true);
 
+  setProgress([
+    {
+      name: "Import Pipeline",
+      status: "running",
+      message: "Starting import...",
+    },
+  ]);
+
   try {
 
     const result =
@@ -143,11 +156,40 @@ export function DataImportCenter() {
 
       });
 
-    console.log(result);
+    setProgress(
+
+      result.steps.map(step => ({
+
+        name: step.name,
+
+        status: step.success
+          ? "success"
+          : "failed",
+
+        message: step.message,
+
+      }))
+
+    );
 
   } catch (error) {
 
-    console.error(error);
+    setProgress([
+
+      {
+
+        name: "Pipeline",
+
+        status: "failed",
+
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unknown error",
+
+      },
+
+    ]);
 
   } finally {
 
@@ -156,7 +198,7 @@ export function DataImportCenter() {
   }
 
   }
-
+  
 function handleImportEverything() {
 
   setImporting(true);
@@ -298,6 +340,10 @@ function handleImportEverything() {
   loading={importing}
   onImportSelected={handleImportSelected}
   onImportEverything={handleImportEverything}
+/>
+
+        <ImportProgress
+  steps={progress}
 />
 
         {!loading && competitions.length === 0 && (
