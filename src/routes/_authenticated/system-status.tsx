@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
 
-import { ImportControls } from "@/components/system-status/ImportControls";
+import { DataImportCenter } from "@/components/system-status/DataImportCenter";
 import { DatabaseSummary } from "@/components/system-status/DatabaseSummary";
 import { EngineStatus } from "@/components/system-status/EngineStatus";
 import { LearningStatus } from "@/components/system-status/LearningStatus";
@@ -78,7 +78,7 @@ function SystemStatusPage() {
   lastSync={apiStatus.lastSync}
 />
 
-    <ImportControls />
+    <DataImportCenter />
       <DatabaseSummary counts={counts} />
 
       <div className="grid gap-4 lg:grid-cols-2">
