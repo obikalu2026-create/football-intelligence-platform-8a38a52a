@@ -2,6 +2,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { AvailableImports } from "./AvailableImports";
 import { ImportActions } from "./ImportActions";
+import { runImportPipeline } from "@/lib/importPipeline.functions";
 
 
 import { getCompetitions } from "@/lib/competitions.functions";
@@ -36,7 +37,10 @@ interface Competition {
 export function DataImportCenter() {
 
   const getCompetitionsFn =
-    useServerFn(getCompetitions);
+  useServerFn(getCompetitions);
+
+  const runPipelineFn =
+  useServerFn(runImportPipeline);
 
   const [loading, setLoading] =
     useState(true);
@@ -114,21 +118,44 @@ export function DataImportCenter() {
 
 }, [competitions, selectedLeague]);
 
-  function handleImportSelected() {
+  async function handleImportSelected() {
+
+  if (!selectedCompetition) {
+    return;
+  }
 
   setImporting(true);
 
-  console.log("Competition:", selectedLeague);
+  try {
 
-  console.log("Imports:", selectedImports);
+    const result =
+      await runPipelineFn({
 
-  setTimeout(() => {
+        data: {
+
+          apiLeagueId:
+            selectedCompetition.id,
+
+          season:
+            new Date().getFullYear(),
+
+        },
+
+      });
+
+    console.log(result);
+
+  } catch (error) {
+
+    console.error(error);
+
+  } finally {
 
     setImporting(false);
 
-  }, 1500);
+  }
 
-}
+  }
 
 function handleImportEverything() {
 
