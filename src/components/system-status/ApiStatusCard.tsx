@@ -45,18 +45,16 @@ export function ApiStatusCard({
     );
 
   return (
-    grid-cols-2 lg:grid-cols-4">
-
-        <div
-  style={{
-    background: "red",
-    color: "white",
-    padding: 30,
-    fontSize: 24,
-    fontWeight: "bold",
-  }}
->
-  API STATUS CARD WORKS
-</div>  
-  );
+  <div
+    style={{
+      background: "red",
+      color: "white",
+      padding: 30,
+      fontSize: 24,
+      fontWeight: "bold",
+    }}
+  >
+    API STATUS CARD WORKS
+  </div>
+);
 }
