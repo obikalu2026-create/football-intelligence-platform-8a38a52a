@@ -8,7 +8,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const WEIGHT_KEYS = ["attack", "defence", "form", "momentum", "home", "away" "head_to_head",
+const WEIGHT_KEYS = ["attack", "defence", "form", "momentum", "home", "away", "head_to_head",
 
   "recent_home_form",
   "recent_away_form",
