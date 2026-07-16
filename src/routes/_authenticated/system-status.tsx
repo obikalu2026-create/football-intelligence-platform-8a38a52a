@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { apiFootballStatus } from "@/lib/apiFootballStatus.functions";
 import { useEffect, useState } from "react";
@@ -60,9 +61,6 @@ function SystemStatusPage() {
 
   loadStatus();
 }, []);
-  
-
-  const lastCycle = cycles[0];
   
   return (
     <div className="space-y-6">
