@@ -1,6 +1,7 @@
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { AvailableImports } from "./AvailableImports";
+import { ImportActions } from "./ImportActions";
 
 
 import { getCompetitions } from "@/lib/competitions.functions";
@@ -57,6 +58,8 @@ export function DataImportCenter() {
     "Fixtures",
     "Standings",
   ]);
+  const [importing, setImporting] =
+  useState(false);
 
   useEffect(() => {
 
@@ -110,6 +113,36 @@ export function DataImportCenter() {
   ) ?? null;
 
 }, [competitions, selectedLeague]);
+
+  function handleImportSelected() {
+
+  setImporting(true);
+
+  console.log("Competition:", selectedLeague);
+
+  console.log("Imports:", selectedImports);
+
+  setTimeout(() => {
+
+    setImporting(false);
+
+  }, 1500);
+
+}
+
+function handleImportEverything() {
+
+  setImporting(true);
+
+  console.log("Import everything");
+
+  setTimeout(() => {
+
+    setImporting(false);
+
+  }, 1500);
+
+}
 
   return (
 
@@ -228,6 +261,16 @@ export function DataImportCenter() {
         <AvailableImports
   selected={selectedImports}
   onChange={setSelectedImports}
+/>
+        
+        <ImportActions
+  competitionId={
+    selectedCompetition?.id ?? null
+  }
+  selectedImports={selectedImports}
+  loading={importing}
+  onImportSelected={handleImportSelected}
+  onImportEverything={handleImportEverything}
 />
 
         {!loading && competitions.length === 0 && (
