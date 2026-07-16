@@ -145,7 +145,73 @@ export function DataImportCenter() {
     </SelectItem>
   ))}
 </SelectContent>
-    </CardContent>
-</Card>
-);
- }
+             </Select>
+
+          </div>
+
+          <div>
+
+            <div className="mb-2 text-sm font-medium">
+              Competition
+            </div>
+
+            <Select
+              value={selectedLeague}
+              onValueChange={setSelectedLeague}
+              disabled={!selectedCountry}
+            >
+
+              <SelectTrigger>
+
+                <SelectValue
+                  placeholder="Select Competition"
+                />
+
+              </SelectTrigger>
+
+              <SelectContent>
+
+                {leagues.map((league) => (
+
+                  <SelectItem
+                    key={league.id}
+                    value={String(league.id)}
+                  >
+
+                    {league.name}
+
+                  </SelectItem>
+
+                ))}
+
+              </SelectContent>
+
+            </Select>
+
+          </div>
+
+        </div>
+
+        {loading && (
+
+          <div className="text-sm text-muted-foreground">
+            Loading competitions...
+          </div>
+
+        )}
+
+        {!loading && competitions.length === 0 && (
+
+          <div className="text-sm text-muted-foreground">
+            No competitions found.
+          </div>
+
+        )}
+
+      </CardContent>
+
+    </Card>
+
+  );
+
+                }   
