@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { apiFootballStatus } from "@/lib/apiFootballStatus.functions";
+import { useEffect, useState } from "react";
 
 import { PageHeader } from "@/components/page-header";
 
@@ -7,6 +9,7 @@ import { ImportControls } from "@/components/system-status/ImportControls";
 import { DatabaseSummary } from "@/components/system-status/DatabaseSummary";
 import { EngineStatus } from "@/components/system-status/EngineStatus";
 import { LearningStatus } from "@/components/system-status/LearningStatus";
+import { ApiStatusCard } from "@/components/system-status/ApiStatusCard";
 
 import {
   enginesQuery,
@@ -32,6 +35,31 @@ function SystemStatusPage() {
   const { data: engines } = useSuspenseQuery(enginesQuery());
   const { data: cycles } = useSuspenseQuery(learningCyclesQuery());
   const { data: insights } = useSuspenseQuery(learnedInsightsQuery());
+  const apiStatusFn = useServerFn(apiFootballStatus);
+
+  const [apiStatus, setApiStatus] = useState({
+  connected: false,
+  apiKeyConfigured: false,
+  plan: "Unknown",
+  requestsUsed: 0,
+  requestsLimit: 0,
+  resetTime: "Unknown",
+  lastSync: null as string | null,
+});
+
+  useEffect(() => {
+  async function loadStatus() {
+    try {
+      const result = await apiStatusFn();
+
+      setApiStatus(result);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  loadStatus();
+}, []);
   
 
   const lastCycle = cycles[0];
@@ -42,6 +70,15 @@ function SystemStatusPage() {
         title="System Status"
         description="Data volumes, engine health and learning history."
       />
+      <ApiStatusCard
+  connected={apiStatus.connected}
+  apiKeyConfigured={apiStatus.apiKeyConfigured}
+  plan={apiStatus.plan}
+  requestsUsed={apiStatus.requestsUsed}
+  requestsLimit={apiStatus.requestsLimit}
+  resetTime={apiStatus.resetTime}
+  lastSync={apiStatus.lastSync}
+/>
 
     <ImportControls />
       <DatabaseSummary counts={counts} />
