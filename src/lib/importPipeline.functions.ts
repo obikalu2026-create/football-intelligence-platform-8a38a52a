@@ -17,6 +17,7 @@ import {
 export interface ImportPipelineInput {
   apiLeagueId: number;
   season: number;
+  jobId?: string;
 }
 
 export interface ImportPipelineStep {
@@ -69,7 +70,8 @@ export const runImportPipeline = createServerFn({
   },
 });
 
-    const jobId = job.id;
+   jobId = job.id;
+  }
 
     try {
 
