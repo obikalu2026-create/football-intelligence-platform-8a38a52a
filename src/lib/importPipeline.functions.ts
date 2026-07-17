@@ -77,6 +77,9 @@ if (!jobId) {
   jobId = job.id;
 
 }
+    if (!jobId) {
+  throw new Error("Failed to create or resolve import job ID.");
+    }
 
     try {
 
