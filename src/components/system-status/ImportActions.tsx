@@ -16,6 +16,8 @@ interface ImportActionsProps {
 
   competitionId: number | null;
 
+  season: string;
+
   selectedImports: string[];
 
   onImportSelected: () => void;
@@ -29,6 +31,8 @@ interface ImportActionsProps {
 export function ImportActions({
 
   competitionId,
+
+  season,
 
   selectedImports,
 
@@ -76,6 +80,7 @@ export function ImportActions({
           className="w-full"
           disabled={
             !competitionId ||
+             !season ||
             selectedImports.length === 0 ||
             loading
           }
@@ -95,6 +100,7 @@ export function ImportActions({
           className="w-full"
           disabled={
             !competitionId ||
+            !season ||
             loading
           }
           onClick={onImportEverything}
