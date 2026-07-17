@@ -62,7 +62,12 @@ export const runImportPipeline = createServerFn({
     // Create Import Job
     // ---------------------------------------------
 
-    const job = await createImportJob();
+    const job = await createImportJob({
+  data: {
+    leagueId: data.apiLeagueId,
+    season: data.season,
+  },
+});
 
     const jobId = job.id;
 
