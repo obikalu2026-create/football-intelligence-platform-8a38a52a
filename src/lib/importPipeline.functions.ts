@@ -143,8 +143,10 @@ if (!jobId) {
         },
       });
 
-      await bootstrapIntelligenceDirect();
-
+      await bootstrapIntelligenceDirect({
+  competitionId: syncResult.competition_id,
+  seasonId: syncResult.season_id,
+});
       steps[1] = {
         name: "Bootstrap Intelligence",
         status: "success",
