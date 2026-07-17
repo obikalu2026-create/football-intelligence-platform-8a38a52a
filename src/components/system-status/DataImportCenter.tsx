@@ -68,6 +68,9 @@ const getImportProgressFn =
   const [selectedLeague, setSelectedLeague] =
     useState("");
 
+  const [selectedSeason, setSelectedSeason] =
+  useState("");
+
   const [selectedImports, setSelectedImports] =
   useState<string[]>([
     "Competition",
@@ -198,12 +201,12 @@ const getImportProgressFn =
 
   async function handleImportSelected() {
 
-  if (!selectedCompetition) {
+  if (!selectedCompetition || !selectedSeason) {
     return;
   }
 
   const season =
-    new Date().getFullYear();
+    Number(selectedSeason);
 
   setImporting(true);
 
@@ -317,6 +320,8 @@ function handleImportEverything() {
 
                 setSelectedLeague("");
 
+                setSelectedSeason("");
+
               }}
             >
 
@@ -349,10 +354,16 @@ function handleImportEverything() {
             </div>
 
             <Select
-              value={selectedLeague}
-              onValueChange={setSelectedLeague}
-              disabled={!selectedCountry}
-            >
+  value={selectedLeague}
+  onValueChange={(value) => {
+
+    setSelectedLeague(value);
+
+    setSelectedSeason("");
+
+  }}
+  disabled={!selectedCountry}
+>
 
               <SelectTrigger>
 
@@ -382,6 +393,45 @@ function handleImportEverything() {
             </Select>
 
           </div>
+          <div>
+
+  <div className="mb-2 text-sm font-medium">
+    Season
+  </div>
+
+  <Select
+    value={selectedSeason}
+    onValueChange={setSelectedSeason}
+    disabled={!selectedLeague}
+  >
+
+    <SelectTrigger>
+
+      <SelectValue
+        placeholder="Select Season"
+      />
+
+    </SelectTrigger>
+
+    <SelectContent>
+
+      <SelectItem value="2024">
+        2024
+      </SelectItem>
+
+      <SelectItem value="2023">
+        2023
+      </SelectItem>
+
+      <SelectItem value="2022">
+        2022
+      </SelectItem>
+
+    </SelectContent>
+
+  </Select>
+
+</div>
 
         </div>
 
