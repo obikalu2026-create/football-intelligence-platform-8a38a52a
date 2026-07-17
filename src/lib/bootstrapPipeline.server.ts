@@ -7,8 +7,14 @@
 // createServerFn.
 
 
-export async function bootstrapIntelligenceDirect() {
-
+export async function bootstrapIntelligenceDirect({
+  competitionId,
+  seasonId,
+}: {
+  competitionId: string;
+  seasonId: string;
+}) {
+  
   const { supabaseAdmin } = await import(
     "@/integrations/supabase/client.server"
   );
@@ -42,24 +48,25 @@ export async function bootstrapIntelligenceDirect() {
   // STEP 2 — Load seasons
   // =============================================
 
-  const { data: seasons, error: seasonsError } =
-    await supabaseAdmin
-      .from("seasons")
-      .select("id, competition_id");
+    const {
+  data: season,
+  error: seasonError,
+} = await supabaseAdmin
+  .from("seasons")
+  .select("id, competition_id")
+  .eq("id", seasonId)
+  .eq("competition_id", competitionId)
+  .single();
 
-  if (seasonsError) {
-    throw seasonsError;
-  }
-
-  if (!seasons?.length) {
-
-    return {
-      ok: true,
-      message: "No seasons in database",
-      log,
-    };
-
-  }
+if (seasonError || !season) {
+  throw (
+    seasonError ??
+    new Error(
+      `Season ${seasonId} not found for competition ${competitionId}`,
+    )
+  );
+}
+  
 
   // =============================================
   // STEP 3 — Load intelligence weights
@@ -78,58 +85,50 @@ export async function bootstrapIntelligenceDirect() {
   // STEP 4 — Process each season
   // =============================================
 
-  for (const s of seasons) {
+      const seasonForm =
+  await deriveTeamForm(
+    supabaseAdmin,
+    season.id,
+  );
 
-    if (!s.competition_id) {
-      continue;
-    }
+form += seasonForm;
 
-    const seasonForm =
-      await deriveTeamForm(
-        supabaseAdmin,
-        s.id,
-      );
+const seasonStats =
+  await deriveTeamStatistics(
+    supabaseAdmin,
+    season.id,
+  );
 
-    form += seasonForm;
+stats += seasonStats;
 
-    const seasonStats =
-      await deriveTeamStatistics(
-        supabaseAdmin,
-        s.id,
-      );
+const result =
+  await runIntelligenceForSeason(
+    supabaseAdmin,
+    {
+      id: season.id,
+      competition_id: season.competition_id,
+    },
+    weights,
+    {
+      includeHistorical: true,
+      modelVersion: "v2.0-bootstrap",
+    },
+  );
 
-    stats += seasonStats;
+intel += result.intelligence;
 
-    const result =
-      await runIntelligenceForSeason(
-        supabaseAdmin,
-        {
-          id: s.id,
-          competition_id: s.competition_id,
-        },
-        weights,
-        {
-          includeHistorical: true,
-          modelVersion: "v2.0-bootstrap",
-        },
-      );
+preds += result.predictions;
 
-    intel += result.intelligence;
+power += result.powerRankings;
 
-    preds += result.predictions;
-
-    power += result.powerRankings;
-
-    log.push(
-      `season ${s.id.slice(0, 8)}: ` +
-      `form=${seasonForm} ` +
-      `stats=${seasonStats} ` +
-      `intel=${result.intelligence} ` +
-      `preds=${result.predictions} ` +
-      `power=${result.powerRankings}`,
-    );
-
-  }
+log.push(
+  `season ${season.id.slice(0, 8)}: ` +
+  `form=${seasonForm} ` +
+  `stats=${seasonStats} ` +
+  `intel=${result.intelligence} ` +
+  `preds=${result.predictions} ` +
+  `power=${result.powerRankings}`,
+);
 
   // =============================================
   // STEP 5 — Evaluate pending predictions
