@@ -103,6 +103,7 @@ if (!jobId) {
         },
       });
 
+      const syncResult =
       await syncCompetitionDirect({
   apiLeagueId: data.apiLeagueId,
   season: data.season,
