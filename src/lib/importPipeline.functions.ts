@@ -1,13 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 
-import {
-  evaluatePredictions,
-} from "./sync.functions";
-
 import { syncCompetitionDirect } from "./syncPipeline.server";
 
 import { bootstrapIntelligenceDirect } from "./bootstrapPipeline.server";
 import { recomputeIntelligenceDirect } from "./recomputePipeline.server";
+import { evaluatePredictionsDirect } from "./evaluatePipeline.server";
 import {
   createImportJob,
   updateImportJob,
@@ -220,9 +217,7 @@ if (!jobId) {
         },
       });
 
-      await evaluatePredictions({
-        data: undefined,
-      });
+      await evaluatePredictionsDirect();
 
       steps[3] = {
         name: "Evaluate Predictions",
