@@ -70,6 +70,14 @@ export function ImportActions({
 
         <div className="text-sm text-muted-foreground">
 
+  Selected Season:
+
+  <strong> {season || "None"}</strong>
+
+</div>
+
+        <div className="text-sm text-muted-foreground">
+
           Selected Imports:
 
           <strong> {selectedImports.length}</strong>
