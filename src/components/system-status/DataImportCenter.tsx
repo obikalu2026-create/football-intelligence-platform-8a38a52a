@@ -8,6 +8,11 @@ import {
   type ProgressStep,
 } from "./ImportProgress";
 
+import {
+  createImportJob,
+  getImportProgress,
+} from "@/lib/importProgress.functions";
+
 import { getCompetitions } from "@/lib/competitions.functions";
 import { CompetitionInfoCard } from "./CompetitionInfoCard";
 import {
@@ -45,6 +50,12 @@ export function DataImportCenter() {
   const runPipelineFn =
   useServerFn(runImportPipeline);
 
+  const createImportJobFn =
+  useServerFn(createImportJob);
+
+const getImportProgressFn =
+  useServerFn(getImportProgress);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -69,6 +80,8 @@ export function DataImportCenter() {
   useState(false);
   const [progress, setProgress] =
   useState<ProgressStep[]>([]);
+  const [activeJobId, setActiveJobId] =
+  useState<string | null>(null);
 
   useEffect(() => {
 
@@ -92,6 +105,66 @@ export function DataImportCenter() {
     load();
 
   }, []);
+  useEffect(() => {
+
+  if (!activeJobId) {
+    return;
+  }
+
+  const interval = setInterval(async () => {
+
+    try {
+
+      const job =
+        await getImportProgressFn({
+          data: {
+            jobId: activeJobId,
+          },
+        });
+
+      if (Array.isArray(job.steps)) {
+
+        setProgress(
+          job.steps.map((step: ProgressStep) => ({
+            name: step.name,
+            status: step.status,
+            message: step.message,
+          })),
+        );
+
+      }
+
+      if (
+        job.status === "completed" ||
+        job.status === "failed"
+      ) {
+
+        clearInterval(interval);
+
+        setActiveJobId(null);
+
+        setImporting(false);
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Failed to get import progress:",
+        error,
+      );
+
+    }
+
+  }, 1000);
+
+  return () => {
+
+    clearInterval(interval);
+
+  };
+
+}, [activeJobId]);
 
   const countries = useMemo(() => {
 
@@ -129,75 +202,72 @@ export function DataImportCenter() {
     return;
   }
 
+  const season =
+    new Date().getFullYear();
+
   setImporting(true);
 
   setProgress([
     {
-      name: "Import Pipeline",
+      name: "Preparing Import",
       status: "running",
-      message: "Starting import...",
+      message: "Creating import job...",
     },
   ]);
 
   try {
 
-    const result =
-      await runPipelineFn({
-
+    const job =
+      await createImportJobFn({
         data: {
-
-          apiLeagueId:
-            selectedCompetition.id,
-
-          season:
-            new Date().getFullYear(),
-
+          leagueId: selectedCompetition.id,
+          season: season,
         },
-
       });
 
-    setProgress(
+    setActiveJobId(job.id);
 
-      result.steps.map(step => ({
+    const result =
+      await runPipelineFn({
+        data: {
+          apiLeagueId: selectedCompetition.id,
+          season: season,
+          jobId: job.id,
+        },
+      });
 
-        name: step.name,
-
-        status: step.success
-          ? "success"
-          : "failed",
-
-        message: step.message,
-
-      }))
-
-    );
+    if (!result.success) {
+      console.error(
+        "Import pipeline failed:",
+        result,
+      );
+    }
 
   } catch (error) {
 
+    console.error(
+      "Failed to start import:",
+      error,
+    );
+
     setProgress([
-
       {
-
-        name: "Pipeline",
-
+        name: "Import",
         status: "failed",
-
         message:
           error instanceof Error
             ? error.message
-            : "Unknown error",
-
+            : "Unknown import error",
       },
-
     ]);
 
-  } finally {
-
+    setActiveJobId(null);
     setImporting(false);
 
   }
 
   }
+
   
 function handleImportEverything() {
 
