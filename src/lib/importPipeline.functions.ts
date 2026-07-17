@@ -63,15 +63,20 @@ export const runImportPipeline = createServerFn({
     // Create Import Job
     // ---------------------------------------------
 
-    const job = await createImportJob({
-  data: {
-    leagueId: data.apiLeagueId,
-    season: data.season,
-  },
-});
+    let jobId = data.jobId;
 
-   jobId = job.id;
-  }
+if (!jobId) {
+
+  const job = await createImportJob({
+    data: {
+      leagueId: data.apiLeagueId,
+      season: data.season,
+    },
+  });
+
+  jobId = job.id;
+
+}
 
     try {
 
