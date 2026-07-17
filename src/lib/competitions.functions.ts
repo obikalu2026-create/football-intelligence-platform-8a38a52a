@@ -40,6 +40,19 @@ export const getCompetitions = createServerFn({
   }
 
   const json = await response.json();
+  console.log(
+  "API-Football leagues diagnostic:",
+  JSON.stringify({
+    get: json.get,
+    parameters: json.parameters,
+    errors: json.errors,
+    results: json.results,
+    paging: json.paging,
+    responseLength: Array.isArray(json.response)
+      ? json.response.length
+      : "not-an-array",
+  }),
+);
 
   console.log(
     "API-Football /leagues response:",
