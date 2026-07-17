@@ -7,6 +7,12 @@ import {
 } from "./sync.functions";
 
 import { bootstrapIntelligence } from "./bootstrap.functions";
+import {
+  createImportJob,
+  updateImportJob,
+  finishImportJob,
+  type ImportProgressStep,
+} from "./importProgress.functions";
 
 export interface ImportPipelineInput {
   apiLeagueId: number;
@@ -21,97 +27,257 @@ export interface ImportPipelineStep {
 
 export interface ImportPipelineResult {
   success: boolean;
+  jobId: string;
   steps: ImportPipelineStep[];
 }
 
 export const runImportPipeline = createServerFn({
   method: "POST",
-}).handler(async ({ data }: { data: ImportPipelineInput }) => {
+})
+  .validator(
+    (data: ImportPipelineInput) => data,
+  )
+  .handler(async ({ data }) => {
 
-  const steps: ImportPipelineStep[] = [];
-
-  try {
-
-    // -------------------------------------------------
-    // Step 1 - Sync Competition
-    // -------------------------------------------------
-
-    const syncResult = await syncCompetition({
-      data: {
-        apiLeagueId: data.apiLeagueId,
-        season: data.season,
+    const steps: ImportProgressStep[] = [
+      {
+        name: "Competition Sync",
+        status: "waiting",
       },
-    });
+      {
+        name: "Bootstrap Intelligence",
+        status: "waiting",
+      },
+      {
+        name: "Recompute Intelligence",
+        status: "waiting",
+      },
+      {
+        name: "Evaluate Predictions",
+        status: "waiting",
+      },
+    ];
 
-    steps.push({
-      name: "Competition Sync",
-      success: true,
-      message: "Competition imported successfully.",
-    });
+    // ---------------------------------------------
+    // Create Import Job
+    // ---------------------------------------------
 
-    // -------------------------------------------------
-    // Step 2 - Bootstrap
-    // -------------------------------------------------
+    const job = await createImportJob();
 
-    await bootstrapIntelligence({
-      data: undefined,
-    });
+    const jobId = job.id;
 
-    steps.push({
-      name: "Bootstrap Intelligence",
-      success: true,
-      message: "Bootstrap completed.",
-    });
+    try {
 
-    // -------------------------------------------------
-    // Step 3 - Recompute
-    // -------------------------------------------------
+      // =============================================
+      // STEP 1 — Competition Sync
+      // =============================================
 
-    await recomputeIntelligence({
-      data: {},
-    });
+      steps[0] = {
+        name: "Competition Sync",
+        status: "running",
+        message: "Importing competition data...",
+      };
 
-    steps.push({
-      name: "Recompute Intelligence",
-      success: true,
-      message: "Ratings and predictions updated.",
-    });
+      await updateImportJob({
+        data: {
+          jobId,
+          currentStep: "Competition Sync",
+          progress: 10,
+          steps,
+        },
+      });
 
-    // -------------------------------------------------
-    // Step 4 - Evaluate
-    // -------------------------------------------------
+      await syncCompetition({
+        data: {
+          apiLeagueId: data.apiLeagueId,
+          season: data.season,
+        },
+      });
 
-    await evaluatePredictions({
-      data: undefined,
-    });
+      steps[0] = {
+        name: "Competition Sync",
+        status: "success",
+        message: "Competition imported successfully.",
+      };
 
-    steps.push({
-      name: "Evaluate Predictions",
-      success: true,
-      message: "Prediction evaluation completed.",
-    });
+      await updateImportJob({
+        data: {
+          jobId,
+          currentStep: "Bootstrap Intelligence",
+          progress: 25,
+          steps,
+        },
+      });
 
-    return {
-      success: true,
-      steps,
-    } satisfies ImportPipelineResult;
+      // =============================================
+      // STEP 2 — Bootstrap Intelligence
+      // =============================================
 
-  } catch (error) {
+      steps[1] = {
+        name: "Bootstrap Intelligence",
+        status: "running",
+        message: "Running intelligence bootstrap...",
+      };
 
-    steps.push({
-      name: "Pipeline Failed",
-      success: false,
-      message:
+      await updateImportJob({
+        data: {
+          jobId,
+          currentStep: "Bootstrap Intelligence",
+          progress: 35,
+          steps,
+        },
+      });
+
+      await bootstrapIntelligence({
+        data: undefined,
+      });
+
+      steps[1] = {
+        name: "Bootstrap Intelligence",
+        status: "success",
+        message: "Bootstrap completed.",
+      };
+
+      await updateImportJob({
+        data: {
+          jobId,
+          currentStep: "Recompute Intelligence",
+          progress: 50,
+          steps,
+        },
+      });
+
+      // =============================================
+      // STEP 3 — Recompute Intelligence
+      // =============================================
+
+      steps[2] = {
+        name: "Recompute Intelligence",
+        status: "running",
+        message: "Recomputing ratings and predictions...",
+      };
+
+      await updateImportJob({
+        data: {
+          jobId,
+          currentStep: "Recompute Intelligence",
+          progress: 60,
+          steps,
+        },
+      });
+
+      await recomputeIntelligence({
+        data: {},
+      });
+
+      steps[2] = {
+        name: "Recompute Intelligence",
+        status: "success",
+        message: "Ratings and predictions updated.",
+      };
+
+      await updateImportJob({
+        data: {
+          jobId,
+          currentStep: "Evaluate Predictions",
+          progress: 75,
+          steps,
+        },
+      });
+
+      // =============================================
+      // STEP 4 — Evaluate Predictions
+      // =============================================
+
+      steps[3] = {
+        name: "Evaluate Predictions",
+        status: "running",
+        message: "Evaluating finished fixtures...",
+      };
+
+      await updateImportJob({
+        data: {
+          jobId,
+          currentStep: "Evaluate Predictions",
+          progress: 85,
+          steps,
+        },
+      });
+
+      await evaluatePredictions({
+        data: undefined,
+      });
+
+      steps[3] = {
+        name: "Evaluate Predictions",
+        status: "success",
+        message: "Prediction evaluation completed.",
+      };
+
+      // =============================================
+      // FINISH JOB
+      // =============================================
+
+      await finishImportJob({
+        data: {
+          jobId,
+          success: true,
+          steps,
+        },
+      });
+
+      return {
+        success: true,
+        jobId,
+        steps: steps.map((step) => ({
+          name: step.name,
+          success: step.status === "success",
+          message: step.message ?? "",
+        })),
+      } satisfies ImportPipelineResult;
+
+    } catch (error) {
+
+      const errorMessage =
         error instanceof Error
           ? error.message
-          : "Unknown error",
-    });
+          : "Unknown import pipeline error";
 
-    return {
-      success: false,
-      steps,
-    } satisfies ImportPipelineResult;
+      // Mark whichever step is currently running as failed.
+      const runningIndex =
+        steps.findIndex(
+          (step) => step.status === "running",
+        );
 
-  }
+      if (runningIndex !== -1) {
 
-});
+        steps[runningIndex] = {
+          ...steps[runningIndex],
+          status: "failed",
+          message: errorMessage,
+        };
+
+      }
+
+      await finishImportJob({
+        data: {
+          jobId,
+          success: false,
+          steps,
+          error: errorMessage,
+        },
+      });
+
+      return {
+        success: false,
+        jobId,
+        steps: steps.map((step) => ({
+          name: step.name,
+          success: step.status === "success",
+          message: step.message ?? "",
+        })),
+      } satisfies ImportPipelineResult;
+
+    }
+
+  });
