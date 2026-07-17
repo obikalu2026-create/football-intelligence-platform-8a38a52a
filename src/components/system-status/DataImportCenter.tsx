@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { AvailableImports } from "./AvailableImports";
 import { ImportActions } from "./ImportActions";
 import { runImportPipeline } from "@/lib/importPipeline.functions";
-import { Button } from "@/components/ui/button";
 import {
   ImportProgress,
   type ProgressStep,
@@ -302,14 +301,6 @@ function handleImportEverything() {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <Button
-  type="button"
-  onClick={() => {
-    alert("Data Import Center click works");
-  }}
->
-  Test Click
-</Button>
 
         <div className="grid gap-4 md:grid-cols-2">
 
@@ -323,13 +314,14 @@ function handleImportEverything() {
 
             <select
   value={selectedCountry}
-  onChange={(event) => {
-    setSelectedCountry(event.target.value);
+  onChange={(e) => {
+    const value = e.target.value;
+
+    setSelectedCountry(value);
     setSelectedLeague("");
     setSelectedSeason("");
   }}
-  disabled={loading || countries.length === 0}
-  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
 >
   <option value="">
     Select Country
