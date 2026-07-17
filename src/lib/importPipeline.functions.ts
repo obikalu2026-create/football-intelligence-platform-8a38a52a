@@ -250,9 +250,11 @@ if (!jobId) {
     } catch (error) {
 
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Unknown import pipeline error";
+  error instanceof Error
+    ? error.message
+    : typeof error === "string"
+      ? error
+      : JSON.stringify(error) || "Unknown import pipeline error";
 
       // Mark whichever step is currently running as failed.
       const runningIndex =
