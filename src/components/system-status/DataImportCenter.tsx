@@ -312,39 +312,29 @@ function handleImportEverything() {
 
             </div>
 
-            <Select
-              value={selectedCountry}
-              onValueChange={(value) => {
+            <select
+  value={selectedCountry}
+  onChange={(event) => {
+    setSelectedCountry(event.target.value);
+    setSelectedLeague("");
+    setSelectedSeason("");
+  }}
+  disabled={loading || countries.length === 0}
+  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+>
+  <option value="">
+    Select Country
+  </option>
 
-                setSelectedCountry(value);
-
-                setSelectedLeague("");
-
-                setSelectedSeason("");
-
-              }}
-              disabled={loading || countries.length === 0}
-            >
-
-              <SelectTrigger className="w-full">
-
-                <SelectValue
-                  placeholder="Select Country"
-                />
-
-              </SelectTrigger>
-
-              <SelectContent>
   {countries.map((country) => (
-    <SelectItem
+    <option
       key={country}
       value={country}
     >
       {country}
-    </SelectItem>
+    </option>
   ))}
-</SelectContent>
-             </Select>
+</select>
 
           </div>
 
