@@ -323,9 +323,10 @@ function handleImportEverything() {
                 setSelectedSeason("");
 
               }}
+              disabled={loading || countries.length === 0}
             >
 
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
 
                 <SelectValue
                   placeholder="Select Country"
