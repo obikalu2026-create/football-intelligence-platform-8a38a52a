@@ -7,7 +7,7 @@ import {
 
 import { syncCompetitionDirect } from "./syncPipeline.server";
 
-import { bootstrapIntelligence } from "./bootstrap.functions";
+import { bootstrapIntelligenceDirect } from "./bootstrapPipeline.server";
 import {
   createImportJob,
   updateImportJob,
@@ -142,9 +142,7 @@ if (!jobId) {
         },
       });
 
-      await bootstrapIntelligence({
-        data: undefined,
-      });
+      await bootstrapIntelligenceDirect();
 
       steps[1] = {
         name: "Bootstrap Intelligence",
