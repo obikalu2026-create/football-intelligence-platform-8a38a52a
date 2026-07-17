@@ -94,8 +94,26 @@ const getImportProgressFn =
 
         const data =
           await getCompetitionsFn();
+        console.log(
+  "GET COMPETITIONS RESULT:",
+  data,
+);
 
-        setCompetitions(data);
+alert(
+  `Competitions loaded: ${
+    Array.isArray(data)
+      ? data.length
+      : "NOT AN ARRAY"
+  }`
+);
+
+setCompetitions(
+  Array.isArray(data)
+    ? data
+    : [],
+);
+
+        
 
       } finally {
 
