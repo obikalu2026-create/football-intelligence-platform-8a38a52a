@@ -456,6 +456,7 @@ function handleImportEverything() {
   competitionId={
     selectedCompetition?.id ?? null
   }
+  season={selectedSeason}
   selectedImports={selectedImports}
   loading={importing}
   onImportSelected={handleImportSelected}
