@@ -1,13 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import {
-  recomputeIntelligence,
   evaluatePredictions,
 } from "./sync.functions";
 
 import { syncCompetitionDirect } from "./syncPipeline.server";
 
 import { bootstrapIntelligenceDirect } from "./bootstrapPipeline.server";
+import { recomputeIntelligenceDirect } from "./recomputePipeline.server";
 import {
   createImportJob,
   updateImportJob,
@@ -181,9 +181,10 @@ if (!jobId) {
         },
       });
 
-      await recomputeIntelligence({
-        data: {},
-      });
+      await recomputeIntelligenceDirect({
+  competitionId: syncResult.competition_id,
+  seasonId: syncResult.season_id,
+});
 
       steps[2] = {
         name: "Recompute Intelligence",
