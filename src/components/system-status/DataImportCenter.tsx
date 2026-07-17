@@ -301,6 +301,14 @@ function handleImportEverything() {
       </CardHeader>
 
       <CardContent className="space-y-6">
+        <Button
+  type="button"
+  onClick={() => {
+    alert("Data Import Center click works");
+  }}
+>
+  Test Click
+</Button>
 
         <div className="grid gap-4 md:grid-cols-2">
 
