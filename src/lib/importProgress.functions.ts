@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 
-import { supabase } from "@/lib/supabase";
 
 export interface ImportProgressStep {
 
@@ -26,9 +25,12 @@ export const createImportJob = createServerFn({
     }) => data,
   )
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import(
+  "@/integrations/supabase/client.server"
+);
 
     const { data: job, error } =
-      await supabase
+      await supabaseAdmin
         .from("import_jobs")
         .insert({
           league_id: data.leagueId,
@@ -60,9 +62,12 @@ export const updateImportJob = createServerFn({
     }) => data,
   )
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import(
+  "@/integrations/supabase/client.server"
+);
 
     const { error } =
-      await supabase
+      await supabaseAdmin
         .from("import_jobs")
         .update({
           current_step: data.currentStep,
@@ -92,9 +97,12 @@ export const finishImportJob = createServerFn({
     }) => data,
   )
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import(
+  "@/integrations/supabase/client.server"
+);
 
     const { error } =
-      await supabase
+      await supabaseAdmin
         .from("import_jobs")
         .update({
           status: data.success
@@ -136,9 +144,12 @@ export const getImportProgress = createServerFn({
     }) => data,
   )
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import(
+  "@/integrations/supabase/client.server"
+);
 
     const { data: job, error } =
-      await supabase
+      await supabaseAdmin
         .from("import_jobs")
         .select(
           `
