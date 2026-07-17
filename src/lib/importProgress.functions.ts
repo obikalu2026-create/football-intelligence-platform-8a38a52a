@@ -18,26 +18,36 @@ export interface ImportProgressStep {
 
 export const createImportJob = createServerFn({
   method: "POST",
-}).handler(async () => {
+})
+  .validator(
+    (data: {
+      leagueId: number;
+      season: number;
+    }) => data,
+  )
+  .handler(async ({ data }) => {
 
-  const { data, error } =
-    await supabase
-      .from("import_jobs")
-      .insert({
-        status: "running",
-        progress: 0,
-        steps: [],
-      })
-      .select()
-      .single();
+    const { data: job, error } =
+      await supabase
+        .from("import_jobs")
+        .insert({
+          league_id: data.leagueId,
+          season: data.season,
+          status: "running",
+          current_step: "Preparing Import",
+          progress: 0,
+          steps: [],
+        })
+        .select()
+        .single();
 
-  if (error) {
-    throw error;
-  }
+    if (error) {
+      throw error;
+    }
 
-  return data;
+    return job;
 
-});
+  });
 export const updateImportJob = createServerFn({
   method: "POST",
 })
