@@ -1,10 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import {
-  syncCompetition,
   recomputeIntelligence,
   evaluatePredictions,
 } from "./sync.functions";
+
+import { syncCompetitionDirect } from "./syncPipeline.server";
 
 import { bootstrapIntelligence } from "./bootstrap.functions";
 import {
@@ -102,12 +103,10 @@ if (!jobId) {
         },
       });
 
-      await syncCompetition({
-        data: {
-          apiLeagueId: data.apiLeagueId,
-          season: data.season,
-        },
-      });
+      await syncCompetitionDirect({
+  apiLeagueId: data.apiLeagueId,
+  season: data.season,
+});
 
       steps[0] = {
         name: "Competition Sync",
