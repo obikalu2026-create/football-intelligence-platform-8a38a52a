@@ -14,7 +14,7 @@ export interface ApiFootballStatus {
 
 let lastSuccessfulSync: string | null = null;
 
-export const getApiFootballStatus = createServerFn({
+export const apiFootballStatus = createServerFn({
   method: "GET",
 }).handler(async (): Promise<ApiFootballStatus> => {
   const apiKey = process.env.API_FOOTBALL_KEY;
