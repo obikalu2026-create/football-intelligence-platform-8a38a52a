@@ -1,24 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 
-export interface Competition {
-  id: number;
-  name: string;
-  type: string;
-  country: string;
-  countryCode: string | null;
-  logo: string;
-  flag: string | null;
-}
-
 export const getCompetitions = createServerFn({
   method: "GET",
 }).handler(async () => {
   const apiKey = process.env.API_FOOTBALL_KEY;
 
   if (!apiKey) {
-    throw new Error(
-      "API_FOOTBALL_KEY is not configured.",
-    );
+    return {
+      success: false,
+      message: "API_FOOTBALL_KEY not configured",
+    };
   }
 
   const response = await fetch(
@@ -31,76 +22,27 @@ export const getCompetitions = createServerFn({
     },
   );
 
-  if (!response.ok) {
-    const body = await response.text();
-
-    throw new Error(
-      `API-Football returned ${response.status}: ${body.slice(0, 300)}`,
-    );
-  }
-
   const json = await response.json();
 
-  // ===== Diagnostics =====
+  return {
+    success: response.ok,
+    status: response.status,
 
-  console.log(
-    "API-Football leagues diagnostic:",
-    JSON.stringify({
-      get: json.get,
-      parameters: json.parameters,
-      errors: json.errors,
-      results: json.results,
-      paging: json.paging,
-      responseLength: Array.isArray(json.response)
-        ? json.response.length
-        : "not-an-array",
-    }),
-  );
+    get: json.get,
+    results: json.results,
+    errors: json.errors,
+    paging: json.paging,
 
-  console.log(
-    "API-Football raw response:",
-    JSON.stringify(json).slice(0, 2000),
-  );
+    responseIsArray: Array.isArray(json.response),
 
-  // ===== Validation =====
+    responseLength: Array.isArray(json.response)
+      ? json.response.length
+      : -1,
 
-  const errors = json?.errors;
-
-  const hasErrors =
-    Array.isArray(errors)
-      ? errors.length > 0
-      : errors &&
-        typeof errors === "object"
-      ? Object.keys(errors).length > 0
-      : false;
-
-  if (hasErrors) {
-    throw new Error(
-      `API-Football errors: ${JSON.stringify(errors)}`,
-    );
-  }
-
-  if (!Array.isArray(json.response)) {
-    throw new Error(
-      "API-Football did not return a response array.",
-    );
-  }
-
-  if (json.response.length === 0) {
-    throw new Error(
-      `API-Football returned no competitions. Results: ${json.results ?? "unknown"}`
-    );
-  }
-
-  return json.response.map((item: any) => ({
-    id: item.league.id,
-    name: item.league.name,
-    type: item.league.type,
-
-    country: item.country.name,
-    countryCode: item.country.code ?? null,
-
-    logo: item.league.logo,
-    flag: item.country.flag ?? null,
-  })) satisfies Competition[];
+    firstCompetition:
+      Array.isArray(json.response) &&
+      json.response.length > 0
+        ? json.response[0]
+        : null,
+  };
 });
