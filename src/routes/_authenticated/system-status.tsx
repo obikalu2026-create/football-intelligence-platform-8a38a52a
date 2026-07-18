@@ -44,10 +44,10 @@ function SystemStatusPage() {
   plan: "Unknown",
   requestsUsed: 0,
   requestsLimit: 0,
-  resetTime: "Unknown",
-  lastSync: null as string | null,
+  dailyReset: "Unknown",
+  requestsRemaining: 0,
+  lastSuccessfulSync: null as string | null,
 });
-
   useEffect(() => {
   async function loadStatus() {
     try {
