@@ -40,31 +40,29 @@ export const getCompetitions = createServerFn({
   }
 
   const json = await response.json();
-  if (!Array.isArray(json.response) || json.response.length === 0) {
-  throw new Error(
-    `API-Football returned no competitions. ` +
-    `Results: ${json.results ?? "unknown"}. ` +
-    `Errors: ${JSON.stringify(json.errors ?? {})}`
-  );
-  }
-  console.log(
-  "API-Football leagues diagnostic:",
-  JSON.stringify({
-    get: json.get,
-    parameters: json.parameters,
-    errors: json.errors,
-    results: json.results,
-    paging: json.paging,
-    responseLength: Array.isArray(json.response)
-      ? json.response.length
-      : "not-an-array",
-  }),
-);
+
+  // ===== Diagnostics =====
 
   console.log(
-    "API-Football /leagues response:",
-    JSON.stringify(json).slice(0, 1000),
+    "API-Football leagues diagnostic:",
+    JSON.stringify({
+      get: json.get,
+      parameters: json.parameters,
+      errors: json.errors,
+      results: json.results,
+      paging: json.paging,
+      responseLength: Array.isArray(json.response)
+        ? json.response.length
+        : "not-an-array",
+    }),
   );
+
+  console.log(
+    "API-Football raw response:",
+    JSON.stringify(json).slice(0, 2000),
+  );
+
+  // ===== Validation =====
 
   const errors = json?.errors;
 
@@ -73,24 +71,24 @@ export const getCompetitions = createServerFn({
       ? errors.length > 0
       : errors &&
         typeof errors === "object"
-        ? Object.keys(errors).length > 0
-        : false;
+      ? Object.keys(errors).length > 0
+      : false;
 
   if (hasErrors) {
     throw new Error(
-      `API-Football /leagues errors: ${JSON.stringify(errors)}`,
+      `API-Football errors: ${JSON.stringify(errors)}`,
     );
   }
 
-  if (!Array.isArray(json?.response)) {
+  if (!Array.isArray(json.response)) {
     throw new Error(
-      "API-Football /leagues did not return a valid response array.",
+      "API-Football did not return a response array.",
     );
   }
 
   if (json.response.length === 0) {
     throw new Error(
-      `API-Football /leagues returned 0 competitions. Results: ${json?.results ?? "unknown"}`,
+      `API-Football returned no competitions. Results: ${json.results ?? "unknown"}`
     );
   }
 
