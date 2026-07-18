@@ -40,6 +40,13 @@ export const getCompetitions = createServerFn({
   }
 
   const json = await response.json();
+  if (!Array.isArray(json.response) || json.response.length === 0) {
+  throw new Error(
+    `API-Football returned no competitions. ` +
+    `Results: ${json.results ?? "unknown"}. ` +
+    `Errors: ${JSON.stringify(json.errors ?? {})}`
+  );
+  }
   console.log(
   "API-Football leagues diagnostic:",
   JSON.stringify({
