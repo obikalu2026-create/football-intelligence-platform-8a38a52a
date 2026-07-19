@@ -4,15 +4,14 @@ export interface ApiFootballStatus {
   connected: boolean;
   apiKeyConfigured: boolean;
   plan: string;
-  dailyReset: string;
   requestsUsed: number;
   requestsLimit: number;
-  requestsRemaining: number;
-  lastSuccessfulSync: string | null;
+  resetTime: string;
+  lastSync: string | null;
   message?: string;
 }
 
-let lastSuccessfulSync: string | null = null;
+let lastSync: string | null = null;
 
 export const apiFootballStatus = createServerFn({
   method: "GET",
@@ -24,11 +23,10 @@ export const apiFootballStatus = createServerFn({
       connected: false,
       apiKeyConfigured: false,
       plan: "Unknown",
-      dailyReset: "Unknown",
       requestsUsed: 0,
       requestsLimit: 0,
-      requestsRemaining: 0,
-      lastSuccessfulSync,
+      resetTime: "Unknown",
+      lastSync,
       message: "API_FOOTBALL_KEY is not configured.",
     };
   }
@@ -44,26 +42,25 @@ export const apiFootballStatus = createServerFn({
       },
     );
 
-    if (!response.ok) {
-      return {
-        connected: false,
-        apiKeyConfigured: true,
-        plan: "Unknown",
-        dailyReset: "Unknown",
-        requestsUsed: 0,
-        requestsLimit: 0,
-        requestsRemaining: 0,
-        lastSuccessfulSync,
-        message: `HTTP ${response.status}`,
-      };
-    }
-
     const json = await response.json();
 
     console.log(
       "API-Football Status:",
       JSON.stringify(json, null, 2),
     );
+
+    if (!response.ok) {
+      return {
+        connected: false,
+        apiKeyConfigured: true,
+        plan: "Unknown",
+        requestsUsed: 0,
+        requestsLimit: 0,
+        resetTime: "Unknown",
+        lastSync,
+        message: `HTTP ${response.status}`,
+      };
+    }
 
     if (
       json.errors &&
@@ -73,37 +70,30 @@ export const apiFootballStatus = createServerFn({
         connected: false,
         apiKeyConfigured: true,
         plan: "Unknown",
-        dailyReset: "Unknown",
         requestsUsed: 0,
         requestsLimit: 0,
-        requestsRemaining: 0,
-        lastSuccessfulSync,
+        resetTime: "Unknown",
+        lastSync,
         message: JSON.stringify(json.errors),
       };
     }
 
-    lastSuccessfulSync =
-      new Date().toISOString();
+    lastSync = new Date().toISOString();
 
-    const responseData =
-      Array.isArray(json.response)
-        ? json.response[0]
-        : {};
+    const responseData = Array.isArray(json.response)
+      ? json.response[0]
+      : {};
 
-    const requests =
-      responseData.requests ?? {};
+    const requests = responseData.requests ?? {};
 
     return {
       connected: true,
       apiKeyConfigured: true,
+
       plan:
         responseData.subscription ??
         responseData.account ??
         "Unknown",
-
-      dailyReset:
-        responseData.requests?.reset ??
-        "00:00 UTC",
 
       requestsUsed:
         requests.current ??
@@ -115,11 +105,11 @@ export const apiFootballStatus = createServerFn({
         requests.daily ??
         0,
 
-      requestsRemaining:
-        requests.remaining ??
-        0,
+      resetTime:
+        requests.reset ??
+        "Unknown",
 
-      lastSuccessfulSync,
+      lastSync,
     };
   } catch (error) {
     console.error(
@@ -131,11 +121,10 @@ export const apiFootballStatus = createServerFn({
       connected: false,
       apiKeyConfigured: true,
       plan: "Unknown",
-      dailyReset: "Unknown",
       requestsUsed: 0,
       requestsLimit: 0,
-      requestsRemaining: 0,
-      lastSuccessfulSync,
+      resetTime: "Unknown",
+      lastSync,
       message:
         error instanceof Error
           ? error.message
