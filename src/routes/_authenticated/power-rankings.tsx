@@ -24,7 +24,16 @@ function PowerRankingsPage() {
   const [competitionId, setCompetitionId] = useState<string | undefined>();
   const [seasonId, setSeasonId] = useState<string | undefined>();
   const { data: intel } = useSuspenseQuery(intelligenceQuery({ competitionId, seasonId }));
-  const upcoming = [];
+  const { data: upcoming } = useSuspenseQuery(
+  fixturesQuery({
+    competitionId,
+    seasonId,
+    status: "NS",
+    from: new Date().toISOString(),
+    to: new Date(Date.now() + 14 * 24 * 3600_000).toISOString(),
+    limit: 40,
+  }),
+);
 
   const sorted = useMemo(
     () => intel.slice().sort((a, b) => (b.overall_score ?? 0) - (a.overall_score ?? 0)),
