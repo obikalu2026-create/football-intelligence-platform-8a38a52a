@@ -98,7 +98,7 @@ export function MatchCard({ fixture, prediction }: MatchCardProps) {
             />
             <div className="grid grid-cols-2 gap-2 text-[11px]">
               <MetricPill icon={Zap} label="xG" value={`${(r?.expected_home_goals ?? 0).toFixed(2)} - ${(r?.expected_away_goals ?? 0).toFixed(2)}`} />
-              <MetricPill icon={TrendingUp} label="BTTS" value={pct(m.btts_yes)} />
+              <MetricPill icon={TrendingUp} label="O1.5" value={pct(m.over_1_5)} />
               <MetricPill icon={Shield} label="O 2.5" value={pct(m.over_2_5)} />
               <MetricPill
                 icon={Shield}
