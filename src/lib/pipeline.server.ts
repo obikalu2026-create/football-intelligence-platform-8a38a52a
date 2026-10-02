@@ -842,7 +842,9 @@ away_rest_fatigue:
         reasoning: JSON.parse(
           JSON.stringify({
             bullets: pred.reasoning,
-            markets: pred.markets,
+            markets: pred.active_markets,
+            legacy_markets: pred.markets,
+            engine: "statistical",
             expected_home_goals: pred.intelligence.expected_home_goals,
             expected_away_goals: pred.intelligence.expected_away_goals,
             risk: pred.risk_rating,

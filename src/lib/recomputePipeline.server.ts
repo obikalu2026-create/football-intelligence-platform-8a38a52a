@@ -711,7 +711,12 @@ export async function recomputeIntelligenceDirect({
                 prediction.reasoning,
 
               markets:
+                prediction.active_markets,
+
+              legacy_markets:
                 prediction.markets,
+
+              engine: "statistical",
 
               expected_home_goals:
                 prediction
