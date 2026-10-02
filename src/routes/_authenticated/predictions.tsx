@@ -58,7 +58,7 @@ function PredictionsPage() {
     <div>
       <PageHeader
         title="Predictions"
-        description="Model predictions with confidence, predicted score and evaluation once the fixture is finished."
+        description="Statistical engine predictions across 29 active markets (1X2 sides, double chance, team goals, match goals and result + goals combos), all derived from one joint score matrix. Shown with confidence, predicted score and evaluation once the fixture is finished."
         actions={
           <Select value={scope} onValueChange={(v) => setScope(v as Scope)}>
             <SelectTrigger className="w-[160px]">

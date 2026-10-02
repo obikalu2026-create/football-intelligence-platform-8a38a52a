@@ -1,5 +1,5 @@
 import { clamp } from "./util";
-import type { MarketProbabilities } from "./types";
+import { ACTIVE_MARKET_CODES, type ActiveMarketCode, type ActiveMarketProbabilities, type MarketProbabilities } from "./types";
 
 /**
  * Confidence 0..100 based on 1X2 concentration + gap to second-most-likely.
@@ -21,30 +21,38 @@ export function riskRating(confidence: number): "low" | "medium" | "high" {
   return "high";
 }
 
+export const ACTIVE_MARKET_LABELS: Record<ActiveMarketCode, string> = {
+  HOME_WIN: "Home Win", AWAY_WIN: "Away Win",
+  DC_1X: "Home or Draw", DC_X2: "Away or Draw", DC_12: "Home or Away",
+  HOME_OVER_0_5: "Home Team Over 0.5", AWAY_OVER_0_5: "Away Team Over 0.5",
+  HOME_OVER_1_5: "Home Team Over 1.5", AWAY_OVER_1_5: "Away Team Over 1.5",
+  HOME_WIN_OVER_1_5: "Home Win + Over 1.5", HOME_WIN_OVER_2_5: "Home Win + Over 2.5",
+  HOME_WIN_UNDER_3_5: "Home Win + Under 3.5", HOME_WIN_UNDER_4_5: "Home Win + Under 4.5",
+  AWAY_WIN_OVER_1_5: "Away Win + Over 1.5", AWAY_WIN_OVER_2_5: "Away Win + Over 2.5",
+  AWAY_WIN_UNDER_3_5: "Away Win + Under 3.5", AWAY_WIN_UNDER_4_5: "Away Win + Under 4.5",
+  OVER_1_5: "Over 1.5 Goals", OVER_2_5: "Over 2.5 Goals",
+  UNDER_3_5: "Under 3.5 Goals", UNDER_4_5: "Under 4.5 Goals",
+  DC_1X_OVER_1_5: "Home or Draw + Over 1.5", DC_1X_OVER_2_5: "Home or Draw + Over 2.5",
+  DC_1X_UNDER_3_5: "Home or Draw + Under 3.5", DC_1X_UNDER_4_5: "Home or Draw + Under 4.5",
+  DC_X2_OVER_1_5: "Away or Draw + Over 1.5", DC_X2_OVER_2_5: "Away or Draw + Over 2.5",
+  DC_X2_UNDER_3_5: "Away or Draw + Under 3.5", DC_X2_UNDER_4_5: "Away or Draw + Under 4.5",
+};
+
+/** Minimum probability for a market to be considered a recommendation. */
+const MIN_RECOMMEND = 0.6;
+
+/**
+ * Recommend only from the 29 active markets. Prefers more specific (lower
+ * base-rate) markets by ranking on probability among those above threshold.
+ */
 export function recommendedMarkets(
-  m: MarketProbabilities,
+  m: ActiveMarketProbabilities,
   confidence: number,
 ): string[] {
-  const picks: { label: string; p: number }[] = [];
-  const push = (label: string, p: number, min: number) => {
-    if (p >= min) picks.push({ label, p });
-  };
-  const top1x2 = Math.max(m.home_win, m.draw, m.away_win);
-  if (top1x2 === m.home_win) push("Home Win", m.home_win, 0.5);
-  else if (top1x2 === m.away_win) push("Away Win", m.away_win, 0.5);
-  else push("Draw", m.draw, 0.4);
-
-  push("Double Chance 1X", m.double_chance_1x, 0.7);
-  push("Double Chance X2", m.double_chance_x2, 0.7);
-  push("BTTS Yes", m.btts_yes, 0.62);
-  push("BTTS No", m.btts_no, 0.62);
-  push("Over 2.5", m.over_2_5, 0.6);
-  push("Under 2.5", m.under_2_5, 0.6);
-  push("Over 1.5", m.over_1_5, 0.75);
-
   const cap = confidence >= 60 ? 4 : 3;
-  return picks
+  return ACTIVE_MARKET_CODES.filter((c) => m[c] >= MIN_RECOMMEND && m[c] < 0.97)
+    .map((c) => ({ c, p: m[c] }))
     .sort((a, b) => b.p - a.p)
     .slice(0, cap)
-    .map((p) => `${p.label} (${(p.p * 100).toFixed(0)}%)`);
+    .map(({ c, p }) => `${ACTIVE_MARKET_LABELS[c]} (${(p * 100).toFixed(0)}%)`);
 }

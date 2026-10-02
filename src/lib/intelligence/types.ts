@@ -98,6 +98,9 @@ away_recent_form: {
   away_rating: number;
 };
 
+home_recent_stats: RecentHomeAwayStats;
+away_recent_stats: RecentHomeAwayStats;
+
 home_rest_fatigue: {
   freshness: number;
   fatigue: number;
@@ -137,6 +140,20 @@ export interface MarketProbabilities {
   away_win_and_over_2_5: number;
 }
 
+/** Authoritative active market codes (mirror of active rows in public.prediction_markets). */
+export const ACTIVE_MARKET_CODES = [
+  "HOME_WIN", "AWAY_WIN", "DC_1X", "DC_X2", "DC_12",
+  "HOME_OVER_0_5", "AWAY_OVER_0_5", "HOME_OVER_1_5", "AWAY_OVER_1_5",
+  "HOME_WIN_OVER_1_5", "HOME_WIN_OVER_2_5", "HOME_WIN_UNDER_3_5", "HOME_WIN_UNDER_4_5",
+  "AWAY_WIN_OVER_1_5", "AWAY_WIN_OVER_2_5", "AWAY_WIN_UNDER_3_5", "AWAY_WIN_UNDER_4_5",
+  "OVER_1_5", "OVER_2_5", "UNDER_3_5", "UNDER_4_5",
+  "DC_1X_OVER_1_5", "DC_1X_OVER_2_5", "DC_1X_UNDER_3_5", "DC_1X_UNDER_4_5",
+  "DC_X2_OVER_1_5", "DC_X2_OVER_2_5", "DC_X2_UNDER_3_5", "DC_X2_UNDER_4_5",
+] as const;
+
+export type ActiveMarketCode = (typeof ACTIVE_MARKET_CODES)[number];
+export type ActiveMarketProbabilities = Record<ActiveMarketCode, number>;
+
 export interface CorrectScoreCandidate {
   home: number;
   away: number;
@@ -146,11 +163,23 @@ export interface CorrectScoreCandidate {
 export interface PredictionOutput {
   fixture_id: string;
   intelligence: FixtureIntelligence;
+  /** Legacy/extensibility market set (includes disabled markets; never recommended). */
   markets: MarketProbabilities;
+  /** The 29 active markets, all derived from the same joint score matrix. */
+  active_markets: ActiveMarketProbabilities;
   most_likely_score: { home: number; away: number; probability: number };
   correct_score_candidates: CorrectScoreCandidate[];
   confidence: number; // 0..100
   risk_rating: "low" | "medium" | "high";
   recommended_markets: string[];
   reasoning: string[];
+}
+
+export interface RecentHomeAwayStats {
+  home_points_last5: number;
+  away_points_last5: number;
+  home_goals_for_last5: number;
+  home_goals_against_last5: number;
+  away_goals_for_last5: number;
+  away_goals_against_last5: number;
 }

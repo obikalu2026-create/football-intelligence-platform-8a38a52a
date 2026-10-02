@@ -16,11 +16,6 @@ export const DEFAULT_POWER_WEIGHTS: PowerWeights = {
   momentum: 0.1,
   home: 0.08,
   away: 0.08,
-  head_to_head: 0.08,
-recent_home_form: 0.08,
-recent_away_form: 0.08,
-strength_of_schedule: 0.07,
-expected_goal_difference: 0.10,
 };
 
 /**
@@ -35,11 +30,6 @@ export function powerRating(
     momentum: number;
     home_strength: number;
     away_strength: number;
-    head_to_head: number;
-  recent_home_form: number;
-  recent_away_form: number;
-  strength_of_schedule: number;
-  expected_goal_difference: number;
   },
   weights: PowerWeights = DEFAULT_POWER_WEIGHTS,
 ): number {

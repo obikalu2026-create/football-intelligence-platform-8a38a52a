@@ -10,7 +10,7 @@ import { expectedGoals } from "./engines/goalExpectancy";
 import { bttsRate, cleanSheetRate, overRate } from "./engines/rates";
 import { fixtureDifficulty, strengthOfSchedule } from "./engines/schedule";
 import { DEFAULT_POWER_WEIGHTS, powerRating, type PowerWeights } from "./engines/power";
-import { marketsFromMatrix, scoreMatrix, topScorelines } from "./probability";
+import { activeMarketsFromMatrix, marketsFromMatrix, scoreMatrix, topScorelines, validateActiveMarkets } from "./probability";
 import { confidenceScore, recommendedMarkets, riskRating } from "./confidence";
 import { generateReasoning } from "./reasoning";
 import { clamp } from "./util";
@@ -103,14 +103,14 @@ away_recent_form?: {
   away_goals_for_last5: number;
   away_goals_against_last5: number;
 } | null;
-  home_rest_fatigue: {
+  home_rest_fatigue?: {
   daysRest: number;
   matchesLast7: number;
   matchesLast14: number;
   matchesLast30: number;
 } | null;
 
-away_rest_fatigue: {
+away_rest_fatigue?: {
   daysRest: number;
   matchesLast7: number;
   matchesLast14: number;
@@ -180,20 +180,21 @@ const awayPowerModifier =
 // Rest / Fatigue modifiers
 // ---------------------------------------------------------------------
 
-const homeRestModifier =
-  1 + ((homeRest.freshness - awayRest.freshness) / 100) * 0.08;
+// Bounded multiplicative modifier (max ±4%) from relative freshness.
+const REST_MAX_EFFECT = 0.04;
+const restDelta = clamp((homeRest.freshness - awayRest.freshness) / 100, -1, 1);
+const homeRestModifier = 1 + restDelta * REST_MAX_EFFECT;
+const awayRestModifier = 1 - restDelta * REST_MAX_EFFECT;
 
-const awayRestModifier =
-  1 + ((awayRest.freshness - homeRest.freshness) / 100) * 0.08;
-  
+// Home advantage stays a separate additive goal bump.
 const lambdaHome = clamp(
   baseHome *
     homeAttackModifier *
     homeDefenceModifier *
     homeFormModifier *
     homeMomentumModifier *
-    homePowerModifier +
-  homeRestModifier +
+    homePowerModifier *
+    homeRestModifier +
     HOME_ADVANTAGE_GOALS,
   0.2,
   4.5,
@@ -205,8 +206,8 @@ const lambdaAway = clamp(
     awayDefenceModifier *
     awayFormModifier *
     awayMomentumModifier *
-    awayPowerModifier,
-  awayRestModifier,
+    awayPowerModifier *
+    awayRestModifier,
   0.2,
   4.5,
 );
@@ -305,10 +306,15 @@ export function predictFixture(input: FixtureInput): PredictionOutput {
   const intel = buildFixtureIntelligence(input);
   const matrix = scoreMatrix(intel.expected_home_goals, intel.expected_away_goals);
   const markets = marketsFromMatrix(matrix);
+  const active = activeMarketsFromMatrix(matrix);
+  const violations = validateActiveMarkets(active);
+  if (violations.length > 0) {
+    console.warn(`[engine] market coherence issues for ${input.fixture_id}:`, violations);
+  }
   const scores = topScorelines(matrix, 5);
   const confidence = confidenceScore(markets);
   const risk = riskRating(confidence);
-  const rec = recommendedMarkets(markets, confidence);
+  const rec = recommendedMarkets(active, confidence);
   const reasoning = generateReasoning(intel, markets, {
     home: input.home_team_name,
     away: input.away_team_name,
@@ -317,6 +323,7 @@ export function predictFixture(input: FixtureInput): PredictionOutput {
     fixture_id: input.fixture_id,
     intelligence: intel,
     markets,
+    active_markets: active,
     most_likely_score: scores[0],
     correct_score_candidates: scores,
     confidence,

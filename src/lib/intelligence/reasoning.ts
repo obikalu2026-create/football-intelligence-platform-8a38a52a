@@ -41,7 +41,6 @@ export function generateReasoning(
       `Low-scoring profile expected (${intel.expected_total_goals.toFixed(1)} total xG).`,
     );
   }
-  if (markets.btts_yes > 0.6) out.push(`Both teams to score is favoured (${(markets.btts_yes * 100).toFixed(0)}%).`);
   if (markets.home_clean_sheet > 0.4)
     out.push(`${home} clean sheet is a live outcome (${(markets.home_clean_sheet * 100).toFixed(0)}%).`);
   if (markets.away_clean_sheet > 0.4)

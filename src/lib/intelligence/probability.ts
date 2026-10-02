@@ -1,7 +1,13 @@
 // Poisson (Dixon-Coles-style low-score adjustment optional) goal model.
 
 import { clamp01 } from "./util";
-import type { MarketProbabilities, CorrectScoreCandidate } from "./types";
+import {
+  ACTIVE_MARKET_CODES,
+  type ActiveMarketCode,
+  type ActiveMarketProbabilities,
+  type MarketProbabilities,
+  type CorrectScoreCandidate,
+} from "./types";
 
 const MAX_GOALS = 8;
 
@@ -119,4 +125,89 @@ export function topScorelines(m: number[][], n = 5): CorrectScoreCandidate[] {
   for (let h = 0; h <= MAX_GOALS; h++)
     for (let a = 0; a <= MAX_GOALS; a++) list.push({ home: h, away: a, probability: m[h][a] });
   return list.sort((x, y) => y.probability - x.probability).slice(0, n);
+}
+
+type Cell = (h: number, a: number) => boolean;
+const homeWin: Cell = (h, a) => h > a;
+const awayWin: Cell = (h, a) => a > h;
+const dc1x: Cell = (h, a) => h >= a;
+const dcx2: Cell = (h, a) => a >= h;
+const dc12: Cell = (h, a) => h !== a;
+const over = (t: number): Cell => (h, a) => h + a > t;
+const under = (t: number): Cell => (h, a) => h + a < t;
+const and = (x: Cell, y: Cell): Cell => (h, a) => x(h, a) && y(h, a);
+
+/** Each active market as a predicate over a single scoreline cell. */
+const ACTIVE_MARKET_CELLS: Record<ActiveMarketCode, Cell> = {
+  HOME_WIN: homeWin,
+  AWAY_WIN: awayWin,
+  DC_1X: dc1x,
+  DC_X2: dcx2,
+  DC_12: dc12,
+  HOME_OVER_0_5: (h) => h > 0.5,
+  AWAY_OVER_0_5: (_h, a) => a > 0.5,
+  HOME_OVER_1_5: (h) => h > 1.5,
+  AWAY_OVER_1_5: (_h, a) => a > 1.5,
+  HOME_WIN_OVER_1_5: and(homeWin, over(1.5)),
+  HOME_WIN_OVER_2_5: and(homeWin, over(2.5)),
+  HOME_WIN_UNDER_3_5: and(homeWin, under(3.5)),
+  HOME_WIN_UNDER_4_5: and(homeWin, under(4.5)),
+  AWAY_WIN_OVER_1_5: and(awayWin, over(1.5)),
+  AWAY_WIN_OVER_2_5: and(awayWin, over(2.5)),
+  AWAY_WIN_UNDER_3_5: and(awayWin, under(3.5)),
+  AWAY_WIN_UNDER_4_5: and(awayWin, under(4.5)),
+  OVER_1_5: over(1.5),
+  OVER_2_5: over(2.5),
+  UNDER_3_5: under(3.5),
+  UNDER_4_5: under(4.5),
+  DC_1X_OVER_1_5: and(dc1x, over(1.5)),
+  DC_1X_OVER_2_5: and(dc1x, over(2.5)),
+  DC_1X_UNDER_3_5: and(dc1x, under(3.5)),
+  DC_1X_UNDER_4_5: and(dc1x, under(4.5)),
+  DC_X2_OVER_1_5: and(dcx2, over(1.5)),
+  DC_X2_OVER_2_5: and(dcx2, over(2.5)),
+  DC_X2_UNDER_3_5: and(dcx2, under(3.5)),
+  DC_X2_UNDER_4_5: and(dcx2, under(4.5)),
+};
+
+/**
+ * All 29 active markets from ONE joint score matrix. Combined markets are sums
+ * over cells satisfying both conditions — never products of marginals.
+ */
+export function activeMarketsFromMatrix(m: number[][]): ActiveMarketProbabilities {
+  const out = {} as ActiveMarketProbabilities;
+  for (const code of ACTIVE_MARKET_CODES) {
+    const pred = ACTIVE_MARKET_CELLS[code];
+    let s = 0;
+    for (let h = 0; h < m.length; h++)
+      for (let a = 0; a < m[h].length; a++) if (pred(h, a)) s += m[h][a];
+    out[code] = clamp01(s);
+  }
+  return out;
+}
+
+/** Returns a list of coherence violations (empty = valid). */
+export function validateActiveMarkets(p: ActiveMarketProbabilities, eps = 1e-6): string[] {
+  const errs: string[] = [];
+  for (const code of ACTIVE_MARKET_CODES) {
+    const v = p[code];
+    if (!Number.isFinite(v) || v < -eps || v > 1 + eps) errs.push(`${code} out of [0,1]: ${v}`);
+  }
+  const draw = p.DC_1X - p.HOME_WIN;
+  const check = (label: string, ok: boolean) => { if (!ok) errs.push(label); };
+  check("DC_1X + AWAY_WIN = 1", Math.abs(p.DC_1X + p.AWAY_WIN - 1) < 1e-4);
+  check("DC_X2 + HOME_WIN = 1", Math.abs(p.DC_X2 + p.HOME_WIN - 1) < 1e-4);
+  check("DC_12 = HOME_WIN + AWAY_WIN", Math.abs(p.DC_12 - p.HOME_WIN - p.AWAY_WIN) < 1e-4);
+  check("draw consistent", Math.abs(p.DC_X2 - p.AWAY_WIN - draw) < 1e-4);
+  check("UNDER_3_5 <= UNDER_4_5", p.UNDER_3_5 <= p.UNDER_4_5 + eps);
+  check("OVER_2_5 <= OVER_1_5", p.OVER_2_5 <= p.OVER_1_5 + eps);
+  check("HOME_OVER_1_5 <= HOME_OVER_0_5", p.HOME_OVER_1_5 <= p.HOME_OVER_0_5 + eps);
+  check("AWAY_OVER_1_5 <= AWAY_OVER_0_5", p.AWAY_OVER_1_5 <= p.AWAY_OVER_0_5 + eps);
+  for (const side of ["HOME_WIN", "AWAY_WIN", "DC_1X", "DC_X2"] as const) {
+    for (const leg of ["OVER_1_5", "OVER_2_5", "UNDER_3_5", "UNDER_4_5"] as const) {
+      const c = `${side}_${leg}` as ActiveMarketCode;
+      check(`${c} <= min(${side}, ${leg})`, p[c] <= Math.min(p[side], p[leg]) + eps);
+    }
+  }
+  return errs;
 }

@@ -169,6 +169,45 @@ export type Database = {
           },
         ]
       }
+      import_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_step: string | null
+          error: string | null
+          id: string
+          league_id: number | null
+          progress: number
+          season: number | null
+          status: string
+          steps: Json
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_step?: string | null
+          error?: string | null
+          id?: string
+          league_id?: number | null
+          progress?: number
+          season?: number | null
+          status?: string
+          steps?: Json
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_step?: string | null
+          error?: string | null
+          id?: string
+          league_id?: number | null
+          progress?: number
+          season?: number | null
+          status?: string
+          steps?: Json
+        }
+        Relationships: []
+      }
       intelligence_scores: {
         Row: {
           attack_score: number | null
@@ -215,7 +254,29 @@ export type Database = {
           season_id?: string | null
           team_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "intelligence_scores_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intelligence_scores_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intelligence_scores_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       league_standings: {
         Row: {
@@ -523,9 +584,15 @@ export type Database = {
           away_points: number | null
           away_position: number | null
           away_power: number | null
+          away_strength: number | null
           created_at: string | null
+          expected_goal_difference: number | null
+          head_to_head_away_advantage: number | null
           head_to_head_away_wins: number | null
+          head_to_head_confidence: number | null
+          head_to_head_draw_tendency: number | null
           head_to_head_draws: number | null
+          head_to_head_home_advantage: number | null
           head_to_head_home_wins: number | null
           home_attack: number | null
           home_defense: number | null
@@ -534,11 +601,20 @@ export type Database = {
           home_points: number | null
           home_position: number | null
           home_power: number | null
+          home_strength: number | null
           id: string
           match_difficulty: number | null
           predicted_away_goals: number | null
           predicted_home_goals: number | null
           prediction_id: string
+          recent_away_goals_against: number | null
+          recent_away_goals_for: number | null
+          recent_away_points: number | null
+          recent_home_goals_against: number | null
+          recent_home_goals_for: number | null
+          recent_home_points: number | null
+          strength_of_schedule_away: number | null
+          strength_of_schedule_home: number | null
         }
         Insert: {
           away_attack?: number | null
@@ -548,9 +624,15 @@ export type Database = {
           away_points?: number | null
           away_position?: number | null
           away_power?: number | null
+          away_strength?: number | null
           created_at?: string | null
+          expected_goal_difference?: number | null
+          head_to_head_away_advantage?: number | null
           head_to_head_away_wins?: number | null
+          head_to_head_confidence?: number | null
+          head_to_head_draw_tendency?: number | null
           head_to_head_draws?: number | null
+          head_to_head_home_advantage?: number | null
           head_to_head_home_wins?: number | null
           home_attack?: number | null
           home_defense?: number | null
@@ -559,11 +641,20 @@ export type Database = {
           home_points?: number | null
           home_position?: number | null
           home_power?: number | null
+          home_strength?: number | null
           id?: string
           match_difficulty?: number | null
           predicted_away_goals?: number | null
           predicted_home_goals?: number | null
           prediction_id: string
+          recent_away_goals_against?: number | null
+          recent_away_goals_for?: number | null
+          recent_away_points?: number | null
+          recent_home_goals_against?: number | null
+          recent_home_goals_for?: number | null
+          recent_home_points?: number | null
+          strength_of_schedule_away?: number | null
+          strength_of_schedule_home?: number | null
         }
         Update: {
           away_attack?: number | null
@@ -573,9 +664,15 @@ export type Database = {
           away_points?: number | null
           away_position?: number | null
           away_power?: number | null
+          away_strength?: number | null
           created_at?: string | null
+          expected_goal_difference?: number | null
+          head_to_head_away_advantage?: number | null
           head_to_head_away_wins?: number | null
+          head_to_head_confidence?: number | null
+          head_to_head_draw_tendency?: number | null
           head_to_head_draws?: number | null
+          head_to_head_home_advantage?: number | null
           head_to_head_home_wins?: number | null
           home_attack?: number | null
           home_defense?: number | null
@@ -584,13 +681,30 @@ export type Database = {
           home_points?: number | null
           home_position?: number | null
           home_power?: number | null
+          home_strength?: number | null
           id?: string
           match_difficulty?: number | null
           predicted_away_goals?: number | null
           predicted_home_goals?: number | null
           prediction_id?: string
+          recent_away_goals_against?: number | null
+          recent_away_goals_for?: number | null
+          recent_away_points?: number | null
+          recent_home_goals_against?: number | null
+          recent_home_goals_for?: number | null
+          recent_home_points?: number | null
+          strength_of_schedule_away?: number | null
+          strength_of_schedule_home?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "prediction_features_prediction_id_fkey"
+            columns: ["prediction_id"]
+            isOneToOne: false
+            referencedRelation: "predictions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       prediction_markets: {
         Row: {
@@ -906,6 +1020,11 @@ export type Database = {
       team_statistics: {
         Row: {
           api_id: string
+          away_draws: number | null
+          away_goals_conceded: number | null
+          away_goals_scored: number | null
+          away_losses: number | null
+          away_wins: number | null
           biggest_loss: string | null
           biggest_win: string | null
           clean_sheets: number | null
@@ -916,6 +1035,11 @@ export type Database = {
           form: string | null
           goals_against: number | null
           goals_for: number | null
+          home_draws: number | null
+          home_goals_conceded: number | null
+          home_goals_scored: number | null
+          home_losses: number | null
+          home_wins: number | null
           id: string
           losses: number | null
           matches_played: number | null
@@ -926,6 +1050,11 @@ export type Database = {
         }
         Insert: {
           api_id: string
+          away_draws?: number | null
+          away_goals_conceded?: number | null
+          away_goals_scored?: number | null
+          away_losses?: number | null
+          away_wins?: number | null
           biggest_loss?: string | null
           biggest_win?: string | null
           clean_sheets?: number | null
@@ -936,6 +1065,11 @@ export type Database = {
           form?: string | null
           goals_against?: number | null
           goals_for?: number | null
+          home_draws?: number | null
+          home_goals_conceded?: number | null
+          home_goals_scored?: number | null
+          home_losses?: number | null
+          home_wins?: number | null
           id?: string
           losses?: number | null
           matches_played?: number | null
@@ -946,6 +1080,11 @@ export type Database = {
         }
         Update: {
           api_id?: string
+          away_draws?: number | null
+          away_goals_conceded?: number | null
+          away_goals_scored?: number | null
+          away_losses?: number | null
+          away_wins?: number | null
           biggest_loss?: string | null
           biggest_win?: string | null
           clean_sheets?: number | null
@@ -956,6 +1095,11 @@ export type Database = {
           form?: string | null
           goals_against?: number | null
           goals_for?: number | null
+          home_draws?: number | null
+          home_goals_conceded?: number | null
+          home_goals_scored?: number | null
+          home_losses?: number | null
+          home_wins?: number | null
           id?: string
           losses?: number | null
           matches_played?: number | null
@@ -1192,12 +1336,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1221,11 +1365,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1246,11 +1390,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1271,11 +1415,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1288,11 +1432,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
