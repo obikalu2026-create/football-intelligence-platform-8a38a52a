@@ -98,6 +98,9 @@ away_recent_form: {
   away_rating: number;
 };
 
+home_recent_stats: RecentHomeAwayStats;
+away_recent_stats: RecentHomeAwayStats;
+
 home_rest_fatigue: {
   freshness: number;
   fatigue: number;
@@ -170,4 +173,13 @@ export interface PredictionOutput {
   risk_rating: "low" | "medium" | "high";
   recommended_markets: string[];
   reasoning: string[];
+}
+
+export interface RecentHomeAwayStats {
+  home_points_last5: number;
+  away_points_last5: number;
+  home_goals_for_last5: number;
+  home_goals_against_last5: number;
+  away_goals_for_last5: number;
+  away_goals_against_last5: number;
 }
