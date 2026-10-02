@@ -120,7 +120,6 @@ export async function calibrateWeights(
     throw error;
   }
 
-    }
   const { error: historyError } = await admin
   .from("weight_history")
   .insert({
@@ -143,4 +142,6 @@ export async function calibrateWeights(
 
 if (historyError) {
   throw historyError;
+}
+}
 }
