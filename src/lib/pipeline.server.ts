@@ -289,6 +289,7 @@ else {
     biggest_win: string | null;
     biggest_loss: string | null;
     updated_at: string;
+    [k: string]: string | number | null;
   }[] = [];
 
   for (const t of teams ?? []) {
@@ -394,7 +395,7 @@ export async function runIntelligenceForSeason(
     admin.from("teams").select("id, name, short_name, competition_id").eq("season_id", seasonId),
     admin
       .from("fixtures")
-      .select("id, home_team_id, away_team_id, status, kickoff_time")
+      .select("id, home_team_id, away_team_id, status, kickoff_time, home_score, away_score")
       .eq("season_id", seasonId),
     admin
       .from("team_form")

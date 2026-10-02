@@ -28,17 +28,25 @@ export async function calibrateWeights(
   if (featureError) {
     throw featureError;
   }
+  type FeatureRow = Record<string, unknown> & {
+    prediction_results?: { correct: boolean | null }[] | { correct: boolean | null } | null;
+  };
+  const featureRowsSafe = (featureRows ?? []) as unknown as FeatureRow[];
+  const isCorrect = (r: FeatureRow) => {
+    const pr = r.prediction_results;
+    return Array.isArray(pr) ? pr[0]?.correct : pr?.correct;
+  };
 
-  const correctRows = featureRows.filter(
-    row => row.prediction_results[0]?.correct === true,
+  const correctRows = featureRowsSafe.filter(
+    row => isCorrect(row) === true,
   );
 
-  const wrongRows = featureRows.filter(
-    row => row.prediction_results[0]?.correct === false,
+  const wrongRows = featureRowsSafe.filter(
+    row => isCorrect(row) === false,
   );
   function averageFeature(
-  rows: typeof featureRows,
-  feature: keyof (typeof featureRows)[number],
+  rows: FeatureRow[],
+  feature: string,
 ): number {
 
   if (rows.length === 0) return 0;
@@ -74,12 +82,12 @@ export async function calibrateWeights(
 
   const correctAverage = averageFeature(
     correctRows,
-    feature.predictionFeature as keyof (typeof featureRows)[number],
+    feature.predictionFeature,
   );
 
   const wrongAverage = averageFeature(
     wrongRows,
-    feature.predictionFeature as keyof (typeof featureRows)[number],
+    feature.predictionFeature,
   );
 
   const difference = correctAverage - wrongAverage;
@@ -137,7 +145,7 @@ export async function calibrateWeights(
 
     reason: "Automatic calibration",
 
-    matches_analyzed: featureRows.length,
+    matches_analyzed: featureRowsSafe.length,
   });
 
 if (historyError) {
