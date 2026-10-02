@@ -103,14 +103,14 @@ away_recent_form?: {
   away_goals_for_last5: number;
   away_goals_against_last5: number;
 } | null;
-  home_rest_fatigue: {
+  home_rest_fatigue?: {
   daysRest: number;
   matchesLast7: number;
   matchesLast14: number;
   matchesLast30: number;
 } | null;
 
-away_rest_fatigue: {
+away_rest_fatigue?: {
   daysRest: number;
   matchesLast7: number;
   matchesLast14: number;
